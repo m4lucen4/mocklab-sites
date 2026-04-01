@@ -1,0 +1,226 @@
+---
+import type { Site, SitePage } from "../types";
+
+interface Props {
+  site: Site;
+  pages: SitePage[];
+  siteSlug: string;
+  currentPageSlug?: string;
+}
+
+const { site, pages, siteSlug, currentPageSlug = "home" } = Astro.props;
+const navPages = pages.filter((p) => p.show_in_nav);
+const navType = site.navbar_type ?? 1;
+
+const socials = [
+  { key: "instagram", url: site.instagram_url, label: "Instagram" },
+  { key: "facebook", url: site.facebook_url, label: "Facebook" },
+  { key: "linkedin", url: site.linkedin_url, label: "LinkedIn" },
+].filter((s) => s.url);
+---
+
+<nav
+  data-component="navigation"
+  class="fixed top-0 left-0 right-0 z-50 h-16"
+  style="background-color: var(--color-secondary);"
+>
+  <div class="max-w-7xl mx-auto px-6 md:px-16 h-full flex items-center">
+
+    {navType === 1 ? (
+      /* Variant 1: Menu | Logo | Socials */
+      <>
+        <!-- Menu (left) -->
+        <ul class="hidden md:flex items-center gap-8 flex-1">
+          {navPages.map((page) => {
+            const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
+            const isActive = page.slug === currentPageSlug;
+            return (
+              <li>
+                <a
+                  href={href}
+                  class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60 hover:opacity-100"]}
+                  style="color: var(--color-primary);"
+                >
+                  {page.title}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+
+        <!-- Logo (center) -->
+        <a href={`/${siteSlug}/`} class="flex items-center justify-center flex-1 md:absolute md:left-1/2 md:-translate-x-1/2">
+          {site.logo_url ? (
+            <img src={site.logo_url} alt={site.studio_name} class="h-8 w-auto" />
+          ) : (
+            <span class="text-sm font-semibold tracking-widest uppercase" style="color: var(--color-primary);">
+              {site.studio_name}
+            </span>
+          )}
+        </a>
+
+        <!-- Socials (right) -->
+        <div class="hidden md:flex items-center gap-4 flex-1 justify-end">
+          {socials.map((s) => (
+            <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">
+              {s.key === "instagram" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {s.key === "facebook" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              )}
+              {s.key === "linkedin" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+
+        <!-- Mobile hamburger -->
+        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </>
+    ) : (
+      /* Variant 2: Logo | Menu | Socials */
+      <>
+        <!-- Logo (left) -->
+        <a href={`/${siteSlug}/`} class="flex items-center shrink-0 mr-12">
+          {site.logo_url ? (
+            <img src={site.logo_url} alt={site.studio_name} class="h-8 w-auto" />
+          ) : (
+            <span class="text-sm font-semibold tracking-widest uppercase" style="color: var(--color-primary);">
+              {site.studio_name}
+            </span>
+          )}
+        </a>
+
+        <!-- Menu (center) -->
+        <ul class="hidden md:flex items-center gap-8 flex-1">
+          {navPages.map((page) => {
+            const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
+            const isActive = page.slug === currentPageSlug;
+            return (
+              <li>
+                <a
+                  href={href}
+                  class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60 hover:opacity-100"]}
+                  style="color: var(--color-primary);"
+                >
+                  {page.title}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+
+        <!-- Socials (right) -->
+        <div class="hidden md:flex items-center gap-4 ml-auto">
+          {socials.map((s) => (
+            <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">
+              {s.key === "instagram" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="4"/>
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                </svg>
+              )}
+              {s.key === "facebook" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+              )}
+              {s.key === "linkedin" && (
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+
+        <!-- Mobile hamburger -->
+        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </>
+    )}
+  </div>
+
+  <!-- Mobile menu panel -->
+  <div
+    id="mobile-menu"
+    class="hidden absolute top-16 left-0 right-0 z-40 px-6 py-6 flex-col gap-4 md:hidden"
+    style="background-color: var(--color-secondary);"
+  >
+    {navPages.map((page) => {
+      const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
+      const isActive = page.slug === currentPageSlug;
+      return (
+        <a
+          href={href}
+          class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60"]}
+          style="color: var(--color-primary);"
+        >
+          {page.title}
+        </a>
+      );
+    })}
+    {socials.length > 0 && (
+      <div class="flex items-center gap-4 pt-2 border-t" style="border-color: var(--color-primary); opacity: 0.2;">
+        {socials.map((s) => (
+          <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+             class="opacity-60" style="color: var(--color-primary);">
+            {s.key === "instagram" && (
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+              </svg>
+            )}
+            {s.key === "facebook" && (
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            )}
+            {s.key === "linkedin" && (
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect x="2" y="9" width="4" height="12"/>
+                <circle cx="4" cy="4" r="2"/>
+              </svg>
+            )}
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</nav>
+
+<script>
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  toggle?.addEventListener("click", () => {
+    const isHidden = menu?.classList.contains("hidden");
+    menu?.classList.toggle("hidden", !isHidden);
+    menu?.classList.toggle("flex", isHidden);
+  });
+</script>

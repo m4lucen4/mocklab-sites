@@ -1,0 +1,123 @@
+---
+interface Props {
+  config: {
+    antetitulo?: string;
+    titulo?: string;
+    image?: string;
+    textoIzquierda?: string;
+    textoDerecha?: string;
+    dato1?: number;
+    leyenda1?: string;
+    dato2?: number;
+    leyenda2?: string;
+    dato3?: number;
+    leyenda3?: string;
+    dato4?: number;
+    leyenda4?: string;
+    type: 1 | 2;
+  };
+  primaryColor: string;
+  secondaryColor: string;
+}
+
+const { config } = Astro.props;
+const { type } = config;
+---
+
+{type === 1 ? (
+  <section data-component="content" class="px-6 md:px-16 py-16 md:py-24">
+    <div class="mb-12 md:mb-16">
+      {config.antetitulo && (
+        <p class="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style="color: var(--color-primary);">{config.antetitulo}</p>
+      )}
+      {config.titulo && (
+        <h2 class="text-4xl md:text-5xl font-bold" style="color: var(--color-primary);">{config.titulo}</h2>
+      )}
+    </div>
+    <div class="flex flex-col md:flex-row gap-12 md:gap-16">
+      <div class="w-full md:w-1/2">
+        {config.textoIzquierda && (
+          <p class="text-base leading-relaxed mb-10" style="color: var(--color-primary); opacity: 0.75;">{config.textoIzquierda}</p>
+        )}
+        <div class="flex gap-10">
+          {(config.dato1 != null || config.leyenda1) && (
+            <div>
+              {config.dato1 != null && <p class="text-5xl font-bold" style="color: var(--color-primary);">{config.dato1}</p>}
+              {config.leyenda1 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda1}</p>}
+            </div>
+          )}
+          {(config.dato2 != null || config.leyenda2) && (
+            <div>
+              {config.dato2 != null && <p class="text-5xl font-bold" style="color: var(--color-primary);">{config.dato2}</p>}
+              {config.leyenda2 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda2}</p>}
+            </div>
+          )}
+        </div>
+      </div>
+      <div class="w-full md:w-1/2">
+        {config.textoDerecha && (
+          <p class="text-base leading-relaxed mb-10" style="color: var(--color-primary); opacity: 0.75;">{config.textoDerecha}</p>
+        )}
+        <div class="flex gap-10">
+          {(config.dato3 != null || config.leyenda3) && (
+            <div>
+              {config.dato3 != null && <p class="text-5xl font-bold" style="color: var(--color-primary);">{config.dato3}</p>}
+              {config.leyenda3 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda3}</p>}
+            </div>
+          )}
+          {(config.dato4 != null || config.leyenda4) && (
+            <div>
+              {config.dato4 != null && <p class="text-5xl font-bold" style="color: var(--color-primary);">{config.dato4}</p>}
+              {config.leyenda4 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda4}</p>}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+) : (
+  <section data-component="content" class="flex flex-col md:flex-row" style="min-height: 600px;">
+    <div class="w-full md:w-1/2" style="min-height: 16rem;">
+      {config.image && (
+        <img src={config.image} alt="" class="w-full h-full object-cover block" style="min-height: 16rem;" />
+      )}
+    </div>
+    <div class="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-16 py-12 md:py-20">
+      {config.antetitulo && (
+        <p class="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style="color: var(--color-primary);">{config.antetitulo}</p>
+      )}
+      {config.titulo && (
+        <h2 class="text-3xl md:text-4xl font-bold mb-6" style="color: var(--color-primary);">{config.titulo}</h2>
+      )}
+      {config.textoDerecha && (
+        <p class="text-base leading-relaxed mb-10" style="color: var(--color-primary); opacity: 0.75;">{config.textoDerecha}</p>
+      )}
+      <div class="grid grid-cols-2 gap-8">
+        {(config.dato1 != null || config.leyenda1) && (
+          <div>
+            {config.dato1 != null && <p class="text-4xl font-bold" style="color: var(--color-primary);">{config.dato1}</p>}
+            {config.leyenda1 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda1}</p>}
+          </div>
+        )}
+        {(config.dato2 != null || config.leyenda2) && (
+          <div>
+            {config.dato2 != null && <p class="text-4xl font-bold" style="color: var(--color-primary);">{config.dato2}</p>}
+            {config.leyenda2 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda2}</p>}
+          </div>
+        )}
+        {(config.dato3 != null || config.leyenda3) && (
+          <div>
+            {config.dato3 != null && <p class="text-4xl font-bold" style="color: var(--color-primary);">{config.dato3}</p>}
+            {config.leyenda3 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda3}</p>}
+          </div>
+        )}
+        {(config.dato4 != null || config.leyenda4) && (
+          <div>
+            {config.dato4 != null && <p class="text-4xl font-bold" style="color: var(--color-primary);">{config.dato4}</p>}
+            {config.leyenda4 && <p class="text-xs tracking-wide uppercase mt-1" style="color: var(--color-primary); opacity: 0.6;">{config.leyenda4}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}

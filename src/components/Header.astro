@@ -1,0 +1,112 @@
+---
+import type { HeaderSlide } from "../types";
+
+interface Props {
+  config: HeaderSlide[];
+}
+
+const { config } = Astro.props;
+const isCarousel = config.length > 1;
+---
+
+<header data-component="header" class="relative w-full h-screen overflow-hidden">
+  {isCarousel ? (
+    <>
+      {config.map((slide, index) => (
+        <div
+          class:list={[
+            "carousel-slide absolute inset-0 transition-opacity duration-700",
+            index === 0 ? "opacity-100" : "opacity-0",
+          ]}
+          data-slide-index={index}
+        >
+          {slide.type === 1 ? (
+            <div
+              class="relative h-full bg-cover bg-center"
+              style={`background-image: url('${slide.image_url}')`}
+            >
+              <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+              <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
+                <div class="max-w-2xl mx-auto text-center">
+                  <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">{slide.title}</h1>
+                  <p class="text-sm md:text-base text-white/80 leading-relaxed">{slide.description}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              class="relative h-full bg-cover bg-center"
+              style={`background-image: url('${slide.image_url}')`}
+            >
+              <div class="absolute inset-0 bg-linear-to-r from-black/50 via-black/20 to-transparent" />
+              <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
+                <div class="max-w-lg">
+                  <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">{slide.title}</h1>
+                  <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{slide.description}</p>
+                  <a
+                    href={slide.url_button}
+                    class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
+                  >
+                    {slide.text_button}
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      <!-- Carousel arrows -->
+      <button
+        class="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors"
+        data-carousel-prev
+        aria-label="Slide anterior"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button
+        class="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors"
+        data-carousel-next
+        aria-label="Siguiente slide"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </>
+  ) : config.length === 1 ? (
+    config[0].type === 1 ? (
+      <div
+        class="carousel-slide relative h-full bg-cover bg-center"
+        style={`background-image: url('${config[0].image_url}')`}
+        data-slide-index="0"
+      >
+        <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+        <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
+          <div class="max-w-2xl mx-auto text-center">
+            <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">{config[0].title}</h1>
+            <p class="text-sm md:text-base text-white/80 leading-relaxed">{config[0].description}</p>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div
+        class="carousel-slide relative h-full bg-cover bg-center"
+        style={`background-image: url('${config[0].image_url}')`}
+        data-slide-index="0"
+      >
+        <div class="absolute inset-0 bg-linear-to-r from-black/50 via-black/20 to-transparent" />
+        <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
+          <div class="max-w-lg">
+            <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">{config[0].title}</h1>
+            <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{config[0].description}</p>
+            <a
+              href={config[0].url_button}
+              class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
+            >
+              {config[0].text_button}
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  ) : null}
+</header>

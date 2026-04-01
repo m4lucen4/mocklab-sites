@@ -1,0 +1,565 @@
+---
+import "../styles/global.css";
+import type { Site, SitePage } from "../types";
+import Navigation from "../components/Navigation.astro";
+
+interface Props {
+  site: Site;
+  pages?: SitePage[];
+  currentPageSlug?: string;
+}
+
+const { site, pages = [], currentPageSlug = "home" } = Astro.props;
+
+const fontFamily = site.font || "Inter";
+const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, "+")}:wght@400;500;600;700&display=swap`;
+
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily};`;
+---
+
+<!doctype html>
+<html lang="es" data-slug={site.slug} data-page-slug={currentPageSlug} style={cssVars}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{site.studio_name}</title>
+
+    {site.meta_description && <meta name="description" content={site.meta_description} />}
+    <meta property="og:title" content={site.studio_name} />
+    {site.meta_description && <meta property="og:description" content={site.meta_description} />}
+
+    {site.favicon_url && <link rel="icon" href={site.favicon_url} />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={googleFontUrl} rel="stylesheet" />
+
+    <style>
+      body {
+        font-family: var(--font-family), sans-serif;
+        margin: 0 auto;
+        max-width: 1400px;
+        opacity: 0;
+        transition: opacity 0.15s ease-in;
+      }
+      body.styles-ready {
+        opacity: 1;
+      }
+    </style>
+
+    <script is:inline define:vars={{
+      PUBLIC_SUPABASE_URL: import.meta.env.PUBLIC_SUPABASE_URL,
+      PUBLIC_SUPABASE_ANON_KEY: import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    }}>
+      (function () {
+        var slug = document.documentElement.getAttribute("data-slug");
+        var pageSlug = document.documentElement.getAttribute("data-page-slug");
+        if (!slug) {
+          document.body.classList.add("styles-ready");
+          return;
+        }
+
+        var baseUrl = PUBLIC_SUPABASE_URL + "/rest/v1/";
+        var headers = {
+          apikey: PUBLIC_SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + PUBLIC_SUPABASE_ANON_KEY,
+        };
+
+        // Fetch full site data (styles + navbar config + socials)
+        var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
+          "&select=id,primary_color,secondary_color,font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
+
+        // Fetch all visible pages (for nav + current page components)
+        var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
+          "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav";
+
+        fetch(siteUrl, { headers: headers })
+          .then(function (r) { return r.json(); })
+          .then(function (sites) {
+            if (!sites || sites.length === 0) {
+              document.body.classList.add("styles-ready");
+              return;
+            }
+
+            var site = sites[0];
+            var root = document.documentElement.style;
+
+            // Apply CSS custom properties
+            root.setProperty("--color-primary", site.primary_color);
+            root.setProperty("--color-secondary", site.secondary_color);
+
+            if (site.font) {
+              var fontName = site.font.replace(/ /g, "+");
+              var linkEl = document.createElement("link");
+              linkEl.rel = "stylesheet";
+              linkEl.href = "https://fonts.googleapis.com/css2?family=" + fontName + ":wght@400;500;600;700&display=swap";
+              document.head.appendChild(linkEl);
+              root.setProperty("--font-family", site.font);
+            }
+
+            // Fetch all visible pages in one request
+            var pagesUrl = baseUrl + "site_pages?site_id=eq." + site.id +
+              "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav";
+
+            return fetch(pagesUrl, { headers: headers })
+              .then(function (r) { return r.json(); })
+              .then(function (pages) {
+                if (!pages) pages = [];
+
+                // Re-render navigation with fresh data
+                var navPages = pages.filter(function (p) { return p.show_in_nav; });
+                renderNavigation(site, navPages, slug, pageSlug || "home");
+
+                // Find current page and fetch its components
+                var currentPage = pages.find(function (p) { return p.slug === (pageSlug || "home"); });
+                if (!currentPage) return;
+
+                var compUrl = baseUrl + "site_components?page_id=eq." + currentPage.id +
+                  "&visible=eq.true&order=position.asc&select=type,config";
+                return fetch(compUrl, { headers: headers })
+                  .then(function (r) { return r.json(); })
+                  .then(function (components) {
+                    var pageContent = document.getElementById('page-content');
+                    var preservedEls = pageContent
+                      ? Array.from(pageContent.querySelectorAll('[data-preserve]'))
+                      : [];
+
+                    var pageHtml = '';
+                    if (components) {
+                      components.forEach(function (comp) {
+                        if (comp.type === 'header') pageHtml += buildHeaderHtml(comp.config);
+                        if (comp.type === 'cta') pageHtml += buildCTAHtml(comp.config);
+                        if (comp.type === 'body') pageHtml += buildBodyHtml(comp.config);
+                        if (comp.type === 'content') pageHtml += buildContentHtml(comp.config);
+                      });
+                    }
+
+                    if (pageContent) {
+                      pageContent.innerHTML = pageHtml;
+                      preservedEls.forEach(function (el) { pageContent.appendChild(el); });
+                      var headerEl = pageContent.querySelector('[data-component="header"]');
+                      if (headerEl && headerEl.querySelectorAll('[data-slide-index]').length > 1) {
+                        initCarousel(headerEl);
+                      }
+                    }
+                  });
+              });
+          })
+          .catch(function () {
+            // Fallback: keep build-time content
+          })
+          .finally(function () {
+            document.body.classList.add("styles-ready");
+          });
+
+        // ─── SVG icons ───────────────────────────────────────────────────────
+        var SVG_INSTAGRAM = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>';
+        var SVG_FACEBOOK = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>';
+        var SVG_LINKEDIN = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>';
+        var SVG_HAMBURGER = '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+
+        function buildSocialsHtml(site) {
+          var items = [
+            { key: "instagram", url: site.instagram_url, svg: SVG_INSTAGRAM },
+            { key: "facebook",  url: site.facebook_url,  svg: SVG_FACEBOOK  },
+            { key: "linkedin",  url: site.linkedin_url,  svg: SVG_LINKEDIN  },
+          ].filter(function (s) { return s.url; });
+
+          return items.map(function (s) {
+            return '<a href="' + escapeAttr(s.url) + '" target="_blank" rel="noopener noreferrer"' +
+              ' class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--color-primary);">' +
+              s.svg + '</a>';
+          }).join("");
+        }
+
+        function buildLogoHtml(site, siteSlug) {
+          var inner = site.logo_url
+            ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-8 w-auto">'
+            : '<span class="text-sm font-semibold tracking-widest uppercase" style="color:var(--color-primary);">' + escapeHtml(site.studio_name) + '</span>';
+          return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
+        }
+
+        function buildMenuHtml(navPages, siteSlug, currentPageSlug) {
+          var links = navPages.map(function (p) {
+            var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
+            var cls = p.slug === currentPageSlug
+              ? "text-sm tracking-wide transition-opacity font-semibold opacity-100"
+              : "text-sm tracking-wide transition-opacity opacity-60 hover:opacity-100";
+            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-primary);">' + escapeHtml(p.title) + '</a></li>';
+          }).join("");
+          return '<ul class="hidden md:flex items-center gap-8 flex-1">' + links + '</ul>';
+        }
+
+        function buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site) {
+          var links = navPages.map(function (p) {
+            var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
+            var cls = p.slug === currentPageSlug
+              ? "text-sm tracking-wide font-semibold opacity-100"
+              : "text-sm tracking-wide opacity-60";
+            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-primary);">' + escapeHtml(p.title) + '</a>';
+          }).join("");
+
+          var socials = buildSocialsHtml(site);
+          var socialsRow = socials
+            ? '<div class="flex items-center gap-4 pt-4" style="border-top:1px solid var(--color-primary);opacity:0.4;">' + socials + '</div>'
+            : "";
+
+          return '<div id="mobile-menu" class="hidden absolute top-16 left-0 right-0 z-40 px-6 py-6 flex-col gap-4 md:hidden"' +
+            ' style="background-color:var(--color-secondary);">' +
+            links + socialsRow + '</div>';
+        }
+
+        function buildHamburgerHtml(site) {
+          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-primary);">' + SVG_HAMBURGER + '</button>';
+        }
+
+        function renderNavigation(site, navPages, siteSlug, currentPageSlug) {
+          var nav = document.querySelector('[data-component="navigation"]');
+          if (!nav) return;
+
+          var navType = site.navbar_type || 1;
+          var socialsHtml = buildSocialsHtml(site);
+          var logoHtml = buildLogoHtml(site, siteSlug);
+          var menuHtml = buildMenuHtml(navPages, siteSlug, currentPageSlug);
+          var hamburgerHtml = buildHamburgerHtml(site);
+          var mobileHtml = buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site);
+
+          var innerHtml;
+          if (navType === 1) {
+            // Menu | Logo | Socials
+            innerHtml =
+              '<div class="max-w-7xl mx-auto px-6 md:px-16 h-full flex items-center">' +
+                menuHtml +
+                '<div class="flex items-center justify-center flex-1 md:absolute md:left-1/2 md:-translate-x-1/2">' + logoHtml + '</div>' +
+                (socialsHtml
+                  ? '<div class="hidden md:flex items-center gap-4 flex-1 justify-end">' + socialsHtml + '</div>'
+                  : '<div class="flex-1"></div>') +
+                hamburgerHtml +
+              '</div>';
+          } else {
+            // Logo | Menu | Socials
+            innerHtml =
+              '<div class="max-w-7xl mx-auto px-6 md:px-16 h-full flex items-center">' +
+                '<div class="shrink-0 mr-12">' + logoHtml + '</div>' +
+                menuHtml +
+                (socialsHtml
+                  ? '<div class="hidden md:flex items-center gap-4 ml-auto">' + socialsHtml + '</div>'
+                  : '') +
+                hamburgerHtml +
+              '</div>';
+          }
+
+          nav.innerHTML = innerHtml + mobileHtml;
+
+          // Re-attach mobile hamburger listener
+          var toggle = nav.querySelector("#menu-toggle");
+          var mobileMenu = nav.querySelector("#mobile-menu");
+          if (toggle && mobileMenu) {
+            toggle.addEventListener("click", function () {
+              var isHidden = mobileMenu.classList.contains("hidden");
+              mobileMenu.classList.toggle("hidden", !isHidden);
+              mobileMenu.classList.toggle("flex", isHidden);
+            });
+          }
+        }
+
+        function buildHeaderHtml(config) {
+          if (!config || config.length === 0) return '';
+
+          var isCarousel = config.length > 1;
+          var prevSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+          var nextSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+
+          var slidesHtml = config.map(function (slide, index) {
+            var opacityClass = index === 0 ? "opacity-100" : "opacity-0";
+
+            if (slide.type === 1) {
+              return (
+                '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
+                  '<div class="relative h-full bg-cover bg-center" style="background-image: url(\'' + escapeAttr(slide.image_url) + '\')">' +
+                    '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
+                    '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
+                      '<div class="max-w-2xl mx-auto text-center">' +
+                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">' + escapeHtml(slide.title) + '</h1>' +
+                        '<p class="text-sm md:text-base text-white/80 leading-relaxed">' + escapeHtml(slide.description) + '</p>' +
+                      '</div>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>'
+              );
+            } else {
+              return (
+                '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
+                  '<div class="relative h-full bg-cover bg-center" style="background-image: url(\'' + escapeAttr(slide.image_url) + '\')">' +
+                    '<div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>' +
+                    '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
+                      '<div class="max-w-lg">' +
+                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-white mb-3">' + escapeHtml(slide.title) + '</h1>' +
+                        '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">' + escapeHtml(slide.description) + '</p>' +
+                        '<a href="' + escapeAttr(slide.url_button) + '" class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors">' +
+                          escapeHtml(slide.text_button) +
+                        '</a>' +
+                      '</div>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>'
+              );
+            }
+          }).join("");
+
+          var controlsHtml = "";
+          if (isCarousel) {
+            controlsHtml =
+              '<button class="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-prev aria-label="Slide anterior">' + prevSvg + '</button>' +
+              '<button class="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-next aria-label="Siguiente slide">' + nextSvg + '</button>';
+          }
+
+          return '<header data-component="header" class="relative w-full h-screen overflow-hidden">' + slidesHtml + controlsHtml + '</header>';
+        }
+
+        function buildCTAHtml(config) {
+          if (!config) return '';
+
+          var title = config.title || '';
+          var description = config.description || '';
+          var imageUrl = config.image_url || '';
+          var type = config.type || 1;
+
+          var svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+          function buildLink(url, text, cls, style) {
+            if (!url || !text) return '';
+            var ext = url.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+            return '<a href="' + escapeAttr(url) + '"' + ext + ' class="' + cls + '" style="' + style + '">' + escapeHtml(text) + '</a>';
+          }
+
+          var html = '';
+          if (type === 1 || type === 3) {
+            var isLeft = type === 3;
+            var primaryBtn = buildLink(
+              config.url_primary_button, config.text_primary_button,
+              'inline-block px-8 py-3 font-semibold text-white rounded',
+              'background-color:var(--color-primary);'
+            );
+            var secondaryBtn = '';
+            if (config.url_secondary_button && config.text_secondary_button) {
+              var ext2 = config.url_secondary_button.startsWith('http') ? ' target="_blank" rel="noopener noreferrer"' : '';
+              secondaryBtn = '<a href="' + escapeAttr(config.url_secondary_button) + '"' + ext2 +
+                ' class="inline-flex items-center gap-2 font-semibold" style="color:var(--color-primary);">' +
+                escapeHtml(config.text_secondary_button) + svgArrow + '</a>';
+            }
+            var sectionClass = isLeft
+              ? 'flex items-center w-full bg-white'
+              : 'flex items-center justify-center w-full bg-white';
+            var innerClass = isLeft
+              ? 'px-6 md:px-16 py-16 max-w-2xl'
+              : 'text-center px-6 py-16 max-w-3xl mx-auto';
+            var btnsClass = isLeft
+              ? 'flex items-center gap-4 flex-wrap'
+              : 'flex items-center justify-center gap-4 flex-wrap';
+            var buttonsHtmlFinal = (primaryBtn || secondaryBtn)
+              ? '<div class="' + btnsClass + '">' + primaryBtn + secondaryBtn + '</div>'
+              : '';
+            html =
+              '<section data-component="cta" class="' + sectionClass + '" style="min-height:500px;">' +
+                '<div class="' + innerClass + '">' +
+                  (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
+                  '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);">' + escapeHtml(title) + '</h2>' +
+                  '<p class="text-lg mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
+                  buttonsHtmlFinal +
+                '</div>' +
+              '</section>';
+          } else {
+            var primaryBtn2 = buildLink(
+              config.url_primary_button, config.text_primary_button,
+              'inline-block self-start px-8 py-3 font-semibold text-white rounded-full',
+              'background-color:var(--color-primary);'
+            );
+            html =
+              '<section data-component="cta" class="flex flex-col md:flex-row w-full" style="min-height:400px;">' +
+                '<div class="w-full md:w-1/2" style="min-height:300px;background-color:var(--color-secondary);"></div>' +
+                '<div class="flex flex-col justify-center px-10 py-12 w-full md:w-1/2 bg-white">' +
+                  (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
+                  '<h2 class="text-3xl font-bold mb-4" style="color:var(--color-primary);">' + escapeHtml(title) + '</h2>' +
+                  '<p class="text-base mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
+                  primaryBtn2 +
+                '</div>' +
+              '</section>';
+          }
+
+          return html;
+        }
+
+        function buildBodyHtml(config) {
+          if (!config) return '';
+
+          var type = config.type || 1;
+          var imgWrapperStyle = 'aspect-ratio:2/3;overflow:hidden;align-self:start;';
+          var imgWrapperStyleWide = 'aspect-ratio:4/3;overflow:hidden;align-self:start;';
+          var imgStyle = 'width:100%;height:100%;object-fit:cover;display:block;';
+          var descStyle = 'align-self:end;padding:2rem 2.5rem;color:var(--color-primary);';
+          var gridCols = { 1: '1fr 1fr 1fr', 2: '1fr 1fr', 3: '1fr 1fr 1fr 1fr', 4: '1fr 1fr 2fr' };
+          var cols = gridCols[type] || gridCols[1];
+
+          function imgCell(url, wide) {
+            if (!url) return '';
+            var wStyle = wide ? imgWrapperStyleWide : imgWrapperStyle;
+            return '<div style="' + wStyle + '"><img src="' + escapeAttr(url) + '" alt="" style="' + imgStyle + '" /></div>';
+          }
+
+          var inner = '';
+          var desc = '<div style="' + descStyle + '"><p style="margin:0;line-height:1.6;">' + escapeHtml(config.description) + '</p></div>';
+          if (type === 1) {
+            inner = imgCell(config.image_1) + imgCell(config.image_2) + desc;
+          } else if (type === 2) {
+            inner = imgCell(config.image_1, true) + desc;
+          } else if (type === 3) {
+            inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3) + desc;
+          } else if (type === 4) {
+            inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3, true);
+          }
+
+          return '<section data-component="body" style="display:grid;gap:8px;grid-template-columns:' + cols + ';">' + inner + '</section>';
+        }
+
+        function buildContentHtml(config) {
+          if (!config) return '';
+
+          var type = config.type || 1;
+          var antetitulo = config.antetitulo || '';
+          var titulo = config.titulo || '';
+          var textoIzquierda = config.textoIzquierda || '';
+          var textoDerecha = config.textoDerecha || '';
+
+          var antetituloHtml = antetitulo
+            ? '<p class="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style="color:var(--color-primary);">' + escapeHtml(antetitulo) + '</p>'
+            : '';
+
+          function datoBlock(dato, leyenda, size) {
+            if (dato == null && !leyenda) return '';
+            return '<div>' +
+              (dato != null ? '<p class="' + size + ' font-bold" style="color:var(--color-primary);">' + escapeHtml(String(dato)) + '</p>' : '') +
+              (leyenda ? '<p class="text-xs tracking-wide uppercase mt-1" style="color:var(--color-primary);opacity:0.6;">' + escapeHtml(leyenda) + '</p>' : '') +
+            '</div>';
+          }
+
+          if (type === 1) {
+            var tituloHtml = titulo
+              ? '<h2 class="text-4xl md:text-5xl font-bold" style="color:var(--color-primary);">' + escapeHtml(titulo) + '</h2>'
+              : '';
+            var textoIzqHtml = textoIzquierda
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoIzquierda) + '</p>'
+              : '';
+            var textoDelHtml = textoDerecha
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoDerecha) + '</p>'
+              : '';
+            return '<section data-component="content" class="px-6 md:px-16 py-16 md:py-24">' +
+              '<div class="mb-12 md:mb-16">' + antetituloHtml + tituloHtml + '</div>' +
+              '<div class="flex flex-col md:flex-row gap-12 md:gap-16">' +
+                '<div class="w-full md:w-1/2">' +
+                  textoIzqHtml +
+                  '<div class="flex gap-10">' +
+                    datoBlock(config.dato1, config.leyenda1, 'text-5xl') +
+                    datoBlock(config.dato2, config.leyenda2, 'text-5xl') +
+                  '</div>' +
+                '</div>' +
+                '<div class="w-full md:w-1/2">' +
+                  textoDelHtml +
+                  '<div class="flex gap-10">' +
+                    datoBlock(config.dato3, config.leyenda3, 'text-5xl') +
+                    datoBlock(config.dato4, config.leyenda4, 'text-5xl') +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</section>';
+          } else {
+            var tituloHtml2 = titulo
+              ? '<h2 class="text-3xl md:text-4xl font-bold mb-6" style="color:var(--color-primary);">' + escapeHtml(titulo) + '</h2>'
+              : '';
+            var textoDelHtml2 = textoDerecha
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoDerecha) + '</p>'
+              : '';
+            var imageHtml = config.image
+              ? '<img src="' + escapeAttr(config.image) + '" alt="" style="display:block;width:100%;height:100%;min-height:16rem;object-fit:cover;" />'
+              : '';
+            return '<section data-component="content" class="flex flex-col md:flex-row" style="min-height:600px;">' +
+              '<div class="w-full md:w-1/2" style="min-height:16rem;">' + imageHtml + '</div>' +
+              '<div class="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-16 py-12 md:py-20">' +
+                antetituloHtml +
+                tituloHtml2 +
+                textoDelHtml2 +
+                '<div class="grid grid-cols-2 gap-8">' +
+                  datoBlock(config.dato1, config.leyenda1, 'text-4xl') +
+                  datoBlock(config.dato2, config.leyenda2, 'text-4xl') +
+                  datoBlock(config.dato3, config.leyenda3, 'text-4xl') +
+                  datoBlock(config.dato4, config.leyenda4, 'text-4xl') +
+                '</div>' +
+              '</div>' +
+            '</section>';
+          }
+        }
+
+        function initCarousel(carousel) {
+          var slides = carousel.querySelectorAll("[data-slide-index]");
+          var current = 0;
+          var interval;
+
+          function goTo(index) {
+            slides[current].classList.replace("opacity-100", "opacity-0");
+            current = (index + slides.length) % slides.length;
+            slides[current].classList.replace("opacity-0", "opacity-100");
+          }
+
+          function startAutoplay() {
+            interval = setInterval(function () { goTo(current + 1); }, 5000);
+          }
+
+          function resetAutoplay() {
+            clearInterval(interval);
+            startAutoplay();
+          }
+
+          carousel.querySelector("[data-carousel-prev]").addEventListener("click", function () {
+            goTo(current - 1);
+            resetAutoplay();
+          });
+
+          carousel.querySelector("[data-carousel-next]").addEventListener("click", function () {
+            goTo(current + 1);
+            resetAutoplay();
+          });
+
+          startAutoplay();
+        }
+
+        function escapeHtml(str) {
+          if (!str) return "";
+          var div = document.createElement("div");
+          div.appendChild(document.createTextNode(str));
+          return div.innerHTML;
+        }
+
+        function escapeAttr(str) {
+          if (!str) return "";
+          return str.replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+      })();
+    </script>
+
+    <noscript>
+      <style>
+        body { opacity: 1 !important; }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <Navigation
+      site={site}
+      pages={pages}
+      siteSlug={site.slug}
+      currentPageSlug={currentPageSlug}
+    />
+    <main id="page-content">
+      <slot />
+    </main>
+  </body>
+</html>

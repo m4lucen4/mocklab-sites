@@ -1,0 +1,76 @@
+---
+import { getPublishedSites, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
+import type { Site, SitePage, SiteComponent, Project, BodyConfig } from "../../types";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import ProjectList from "../../components/ProjectList.astro";
+import CTA from "../../components/CTA.astro";
+import Body from "../../components/Body.astro";
+import Content from "../../components/Content.astro";
+
+export async function getStaticPaths() {
+  const sites = await getPublishedSites();
+
+  const paths = await Promise.all(
+    sites.map(async (site) => {
+      const pages = await getSitePages(site.id);
+      const nonHomePages = pages.filter((p) => p.slug !== "home");
+
+      const pagePaths = await Promise.all(
+        nonHomePages.map(async (page) => {
+          const components = await getPageComponents(page.id);
+
+          let projects: Project[] = [];
+          if (page.slug === "proyectos") {
+            projects = await getUserProjects(site.user_id);
+          }
+
+          return {
+            params: { slug: site.slug, page: page.slug },
+            props: { site, pages, currentPage: page, components, projects },
+          };
+        })
+      );
+
+      return pagePaths;
+    })
+  );
+
+  return paths.flat();
+}
+
+interface Props {
+  site: Site;
+  pages: SitePage[];
+  currentPage: SitePage;
+  components: SiteComponent[];
+  projects: Project[];
+}
+
+const { site, pages, currentPage, components, projects } = Astro.props;
+
+const projectListComp = components.find((c) => c.type === "project_list");
+const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
+---
+
+<BaseLayout site={site} pages={pages} currentPageSlug={currentPage.slug}>
+  {components.map((component) => {
+    if (component.type === "header") {
+      return <Header config={component.config as any} />;
+    }
+    if (component.type === "cta") {
+      return <CTA config={component.config as any} />;
+    }
+    if (component.type === "body") {
+      return <Body config={component.config as BodyConfig} />;
+    }
+    if (component.type === "content") {
+      return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
+    }
+    return null;
+  })}
+
+  {currentPage.slug === "proyectos" && (
+    <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} />
+  )}
+</BaseLayout>

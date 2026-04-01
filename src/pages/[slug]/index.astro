@@ -1,0 +1,58 @@
+---
+import { getPublishedSites, getSitePages, getPageComponents } from "../../lib/supabase";
+import type { Site, SitePage, SiteComponent, BodyConfig } from "../../types";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import CTA from "../../components/CTA.astro";
+import Body from "../../components/Body.astro";
+import Content from "../../components/Content.astro";
+
+export async function getStaticPaths() {
+  const sites = await getPublishedSites();
+
+  const paths = await Promise.all(
+    sites.map(async (site) => {
+      const pages = await getSitePages(site.id);
+      const homePage = pages.find((p) => p.slug === "home");
+
+      let components: SiteComponent[] = [];
+      if (homePage) {
+        components = await getPageComponents(homePage.id);
+      }
+
+      return {
+        params: { slug: site.slug },
+        props: { site, pages, components },
+      };
+    })
+  );
+
+  return paths;
+}
+
+interface Props {
+  site: Site;
+  pages: SitePage[];
+  components: SiteComponent[];
+}
+
+const { site, pages, components } = Astro.props;
+---
+
+<BaseLayout site={site} pages={pages} currentPageSlug="home">
+  {components.map((component) => {
+    if (component.type === "header") {
+      return <Header config={component.config as any} />;
+    }
+    if (component.type === "cta") {
+      return <CTA config={component.config as any} />;
+    }
+    if (component.type === "body") {
+      return <Body config={component.config as BodyConfig} />;
+    }
+    if (component.type === "content") {
+      return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
+    }
+    return null;
+  })}
+</BaseLayout>

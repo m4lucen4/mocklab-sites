@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm astro:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)",
+      "Bash(rm /Users/miguelangellucenaaguilar/Desktop/workspace/mocklab/mocklab-sites/src/pages/[slug].astro)",
+      "Bash(mkdir -p /Users/miguelangellucenaaguilar/Desktop/workspace/mocklab/mocklab-sites/src/pages/[slug]/proyectos)",
+      "Bash(curl:*)"
+    ]
+  }
+}
