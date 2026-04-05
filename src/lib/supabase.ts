@@ -6,6 +6,18 @@ const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export async function getSiteBySlug(slug: string): Promise<Site | null> {
+  const { data, error } = await supabase
+    .from("sites")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+
+  if (error) return null;
+  return data as Site;
+}
+
 export async function getPublishedSites(): Promise<Site[]> {
   const { data, error } = await supabase
     .from("sites")

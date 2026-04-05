@@ -1,34 +1,26 @@
 ---
-import { getPublishedSites, getSitePages, getUserProjects } from "../../../lib/supabase";
-import type { Site, SitePage, Project } from "../../../types";
+import { getSiteBySlug, getSitePages, getUserProjects } from "../../../lib/supabase";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ProjectDetail from "../../../components/ProjectDetail.astro";
 
-export async function getStaticPaths() {
-  const sites = await getPublishedSites();
+const { slug, project: projectId } = Astro.params;
 
-  const paths = await Promise.all(
-    sites.map(async (site) => {
-      const pages = await getSitePages(site.id);
-      const projects = await getUserProjects(site.user_id);
+const site = await getSiteBySlug(slug!);
 
-      return projects.map((project) => ({
-        params: { slug: site.slug, project: String(project.id) },
-        props: { site, pages, project },
-      }));
-    })
-  );
-
-  return paths.flat();
+if (!site) {
+  return Astro.redirect('/404');
 }
 
-interface Props {
-  site: Site;
-  pages: SitePage[];
-  project: Project;
-}
+const [pages, projects] = await Promise.all([
+  getSitePages(site.id),
+  getUserProjects(site.user_id),
+]);
 
-const { site, pages, project } = Astro.props;
+const project = projects.find((p) => String(p.id) === projectId);
+
+if (!project) {
+  return Astro.redirect('/404');
+}
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug="proyectos">

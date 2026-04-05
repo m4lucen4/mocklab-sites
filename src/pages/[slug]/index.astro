@@ -1,42 +1,27 @@
 ---
-import { getPublishedSites, getSitePages, getPageComponents } from "../../lib/supabase";
-import type { Site, SitePage, SiteComponent, BodyConfig } from "../../types";
+import { getSiteBySlug, getSitePages, getPageComponents } from "../../lib/supabase";
+import type { SiteComponent, BodyConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
 
-export async function getStaticPaths() {
-  const sites = await getPublishedSites();
+const { slug } = Astro.params;
 
-  const paths = await Promise.all(
-    sites.map(async (site) => {
-      const pages = await getSitePages(site.id);
-      const homePage = pages.find((p) => p.slug === "home");
+const site = await getSiteBySlug(slug!);
 
-      let components: SiteComponent[] = [];
-      if (homePage) {
-        components = await getPageComponents(homePage.id);
-      }
-
-      return {
-        params: { slug: site.slug },
-        props: { site, pages, components },
-      };
-    })
-  );
-
-  return paths;
+if (!site) {
+  return Astro.redirect('/404');
 }
 
-interface Props {
-  site: Site;
-  pages: SitePage[];
-  components: SiteComponent[];
-}
+const pages = await getSitePages(site.id);
+const homePage = pages.find((p) => p.slug === "home");
 
-const { site, pages, components } = Astro.props;
+let components: SiteComponent[] = [];
+if (homePage) {
+  components = await getPageComponents(homePage.id);
+}
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug="home">

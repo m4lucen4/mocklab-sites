@@ -1,6 +1,6 @@
 ---
-import { getPublishedSites, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { Site, SitePage, SiteComponent, Project, BodyConfig } from "../../types";
+import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
+import type { SiteComponent, Project, BodyConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -8,46 +8,27 @@ import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
 
-export async function getStaticPaths() {
-  const sites = await getPublishedSites();
+const { slug, page: pageSlug } = Astro.params;
 
-  const paths = await Promise.all(
-    sites.map(async (site) => {
-      const pages = await getSitePages(site.id);
-      const nonHomePages = pages.filter((p) => p.slug !== "home");
+const site = await getSiteBySlug(slug!);
 
-      const pagePaths = await Promise.all(
-        nonHomePages.map(async (page) => {
-          const components = await getPageComponents(page.id);
-
-          let projects: Project[] = [];
-          if (page.slug === "proyectos") {
-            projects = await getUserProjects(site.user_id);
-          }
-
-          return {
-            params: { slug: site.slug, page: page.slug },
-            props: { site, pages, currentPage: page, components, projects },
-          };
-        })
-      );
-
-      return pagePaths;
-    })
-  );
-
-  return paths.flat();
+if (!site) {
+  return Astro.redirect('/404');
 }
 
-interface Props {
-  site: Site;
-  pages: SitePage[];
-  currentPage: SitePage;
-  components: SiteComponent[];
-  projects: Project[];
+const pages = await getSitePages(site.id);
+const currentPage = pages.find((p) => p.slug === pageSlug);
+
+if (!currentPage) {
+  return Astro.redirect('/404');
 }
 
-const { site, pages, currentPage, components, projects } = Astro.props;
+const components = await getPageComponents(currentPage.id);
+
+let projects: Project[] = [];
+if (currentPage.slug === "proyectos") {
+  projects = await getUserProjects(site.user_id);
+}
 
 const projectListComp = components.find((c) => c.type === "project_list");
 const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
