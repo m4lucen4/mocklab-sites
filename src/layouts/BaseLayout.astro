@@ -14,7 +14,7 @@ const { site, pages = [], currentPageSlug = "home" } = Astro.props;
 const fontFamily = site.font || "Inter";
 const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, "+")}:wght@400;500;600;700&display=swap`;
 
-const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily};`;
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
 ---
 
 <!doctype html>
@@ -38,6 +38,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         font-family: var(--font-family), sans-serif;
         margin: 0 auto;
         max-width: 1400px;
+        background-color: var(--background-color, #ffffff);
         opacity: 0;
         transition: opacity 0.15s ease-in;
       }
@@ -66,7 +67,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
+          "&select=id,primary_color,secondary_color,background_color,font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -86,6 +87,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             // Apply CSS custom properties
             root.setProperty("--color-primary", site.primary_color);
             root.setProperty("--color-secondary", site.secondary_color);
+            root.setProperty("--background-color", site.background_color || "#ffffff");
 
             if (site.font) {
               var fontName = site.font.replace(/ /g, "+");
@@ -174,7 +176,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         function buildLogoHtml(site, siteSlug) {
           var inner = site.logo_url
             ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-8 w-auto">'
-            : '<span class="text-sm font-semibold tracking-widest uppercase" style="color:var(--color-primary);">' + escapeHtml(site.studio_name) + '</span>';
+            : '<span class="text-sm font-semibold tracking-widest" style="color:var(--color-primary);">' + escapeHtml(site.studio_name) + '</span>';
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
 
