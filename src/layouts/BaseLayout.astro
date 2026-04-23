@@ -14,7 +14,9 @@ const { site, pages = [], currentPageSlug = "home" } = Astro.props;
 const fontFamily = site.font || "Inter";
 const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, "+")}:wght@400;500;600;700&display=swap`;
 
-const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
+const titleFontFamily = site.title_font || fontFamily;
+const titleFontUrl = site.title_font ? `https://fonts.googleapis.com/css2?family=${site.title_font.replace(/ /g, "+")}:wght@400;500;600;700&display=swap` : null;
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
 ---
 
 <!doctype html>
@@ -32,6 +34,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href={googleFontUrl} rel="stylesheet" />
+    {titleFontUrl && <link href={titleFontUrl} rel="stylesheet" />}
 
     <style>
       body {
@@ -67,7 +70,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
+          "&select=id,primary_color,secondary_color,background_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -96,6 +99,17 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               linkEl.href = "https://fonts.googleapis.com/css2?family=" + fontName + ":wght@400;500;600;700&display=swap";
               document.head.appendChild(linkEl);
               root.setProperty("--font-family", site.font);
+            }
+
+            if (site.title_font) {
+              var titleFontName = site.title_font.replace(/ /g, "+");
+              var titleLinkEl = document.createElement("link");
+              titleLinkEl.rel = "stylesheet";
+              titleLinkEl.href = "https://fonts.googleapis.com/css2?family=" + titleFontName + ":wght@400;500;600;700&display=swap";
+              document.head.appendChild(titleLinkEl);
+              root.setProperty("--title-font", site.title_font);
+            } else {
+              root.setProperty("--title-font", site.font || "Inter");
             }
 
             // Fetch all visible pages in one request
@@ -285,7 +299,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                     '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
                     '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
                       '<div class="max-w-2xl mx-auto text-center">' +
-                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3">' + escapeHtml(slide.title) + '</h1>' +
+                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
                         '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">' + escapeHtml(slide.description) + '</p>' +
                         buttonHtml +
                       '</div>' +
@@ -300,7 +314,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                     '<div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>' +
                     '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
                       '<div class="max-w-lg">' +
-                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3">' + escapeHtml(slide.title) + '</h1>' +
+                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
                         '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">' + escapeHtml(slide.description) + '</p>' +
                         buttonHtml +
                       '</div>' +
