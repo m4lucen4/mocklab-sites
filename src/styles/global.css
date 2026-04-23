@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+.body-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+}
+.body-grid .img-wrapper { aspect-ratio: 2/3; overflow: hidden; align-self: start; }
+.body-grid .img-wrapper-wide { aspect-ratio: 4/3; overflow: hidden; align-self: start; }
+
+@media (min-width: 520px) {
+  .body-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1024px) {
+  .body-grid-1 { grid-template-columns: 1fr 1fr 1fr; }
+  .body-grid-2 { grid-template-columns: 1fr 1fr; }
+  .body-grid-3 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .body-grid-4 { grid-template-columns: 1fr 1fr 2fr; }
+}

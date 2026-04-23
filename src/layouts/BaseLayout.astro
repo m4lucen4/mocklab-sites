@@ -412,17 +412,13 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           if (!config) return '';
 
           var type = config.type || 1;
-          var imgWrapperStyle = 'aspect-ratio:2/3;overflow:hidden;align-self:start;';
-          var imgWrapperStyleWide = 'aspect-ratio:4/3;overflow:hidden;align-self:start;';
           var imgStyle = 'width:100%;height:100%;object-fit:cover;display:block;';
           var descStyle = 'align-self:end;padding:2rem 2.5rem;color:var(--color-primary);';
-          var gridCols = { 1: '1fr 1fr 1fr', 2: '1fr 1fr', 3: '1fr 1fr 1fr 1fr', 4: '1fr 1fr 2fr' };
-          var cols = gridCols[type] || gridCols[1];
 
           function imgCell(url, wide) {
             if (!url) return '';
-            var wStyle = wide ? imgWrapperStyleWide : imgWrapperStyle;
-            return '<div style="' + wStyle + '"><img src="' + escapeAttr(url) + '" alt="" style="' + imgStyle + '" /></div>';
+            var cls = wide ? 'img-wrapper-wide' : 'img-wrapper';
+            return '<div class="' + cls + '"><img src="' + escapeAttr(url) + '" alt="" style="' + imgStyle + '" /></div>';
           }
 
           var inner = '';
@@ -437,7 +433,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3, true);
           }
 
-          return '<section data-component="body" style="display:grid;gap:8px;grid-template-columns:' + cols + ';">' + inner + '</section>';
+          return '<section data-component="body" class="body-grid body-grid-' + type + '">' + inner + '</section>';
         }
 
         function buildContentHtml(config) {

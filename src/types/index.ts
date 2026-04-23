@@ -7,6 +7,7 @@ export interface Site {
   primary_color: string;
   secondary_color: string;
   font: string;
+  title_font: string | null;
   custom_domain: string | null;
   favicon_url: string | null;
   meta_description: string | null;
