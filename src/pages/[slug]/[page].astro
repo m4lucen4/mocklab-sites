@@ -7,6 +7,7 @@ import ProjectList from "../../components/ProjectList.astro";
 import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
+import LegalPage from "../../components/LegalPage.astro";
 
 const { slug, page: pageSlug } = Astro.params;
 
@@ -23,7 +24,9 @@ if (!currentPage) {
   return Astro.redirect('/404');
 }
 
-const components = await getPageComponents(currentPage.id);
+const isLegal = currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies";
+
+const components = isLegal ? [] : await getPageComponents(currentPage.id);
 
 let projects: Project[] = [];
 if (currentPage.slug === "proyectos") {
@@ -35,23 +38,29 @@ const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug={currentPage.slug}>
-  {components.map((component) => {
-    if (component.type === "header") {
-      return <Header config={component.config as any} />;
-    }
-    if (component.type === "cta") {
-      return <CTA config={component.config as any} />;
-    }
-    if (component.type === "body") {
-      return <Body config={component.config as BodyConfig} />;
-    }
-    if (component.type === "content") {
-      return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
-    }
-    return null;
-  })}
+  {isLegal ? (
+    <LegalPage title={currentPage.title} content={currentPage.content} />
+  ) : (
+    <>
+      {components.map((component) => {
+        if (component.type === "header") {
+          return <Header config={component.config as any} />;
+        }
+        if (component.type === "cta") {
+          return <CTA config={component.config as any} />;
+        }
+        if (component.type === "body") {
+          return <Body config={component.config as BodyConfig} />;
+        }
+        if (component.type === "content") {
+          return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
+        }
+        return null;
+      })}
 
-  {currentPage.slug === "proyectos" && (
-    <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} />
+      {currentPage.slug === "proyectos" && (
+        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} />
+      )}
+    </>
   )}
 </BaseLayout>

@@ -115,7 +115,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
             // Fetch all visible pages in one request
             var pagesUrl = baseUrl + "site_pages?site_id=eq." + site.id +
-              "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav";
+              "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav,content";
 
             return fetch(pagesUrl, { headers: headers })
               .then(function (r) { return r.json(); })
@@ -147,6 +147,15 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 // Find current page and fetch its components
                 var currentPage = pages.find(function (p) { return p.slug === (pageSlug || "home"); });
                 if (!currentPage) return;
+
+                // Special page: render legal content directly, skip components fetch
+                if (currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies") {
+                  var pageContent = document.getElementById('page-content');
+                  if (pageContent) {
+                    pageContent.innerHTML = buildLegalHtml(currentPage.title, currentPage.content || null);
+                  }
+                  return;
+                }
 
                 var compUrl = baseUrl + "site_components?page_id=eq." + currentPage.id +
                   "&visible=eq.true&order=position.asc&select=type,config";
@@ -262,7 +271,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           if (navType === 1) {
             // Menu | Logo | Socials
             innerHtml =
-              '<div class="max-w-7xl mx-auto px-6 md:px-16 h-full flex items-center">' +
+              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:1400px;margin:0 auto;">' +
                 menuHtml +
                 '<div class="flex items-center justify-center flex-1 md:absolute md:left-1/2 md:-translate-x-1/2">' + logoHtml + '</div>' +
                 (socialsHtml
@@ -273,7 +282,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           } else {
             // Logo | Menu | Socials
             innerHtml =
-              '<div class="max-w-7xl mx-auto px-6 md:px-16 h-full flex items-center">' +
+              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:1400px;margin:0 auto;">' +
                 '<div class="shrink-0 mr-12">' + logoHtml + '</div>' +
                 menuHtml +
                 (socialsHtml
@@ -295,6 +304,28 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               mobileMenu.classList.toggle("flex", isHidden);
             });
           }
+        }
+
+        function buildLegalHtml(title, content) {
+          if (!content) return '';
+
+          var linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+          var parsed = '';
+          var lastIndex = 0;
+          var match;
+          while ((match = linkRegex.exec(content)) !== null) {
+            parsed += escapeHtml(content.slice(lastIndex, match.index));
+            parsed += '<a href="' + escapeAttr(match[2]) + '" target="_blank" rel="noopener noreferrer"' +
+              ' style="color:var(--color-primary);text-decoration:underline;opacity:1;">' +
+              escapeHtml(match[1]) + '</a>';
+            lastIndex = match.index + match[0].length;
+          }
+          parsed += escapeHtml(content.slice(lastIndex));
+
+          return '<section data-component="legal" class="px-6 md:px-16 py-16 md:py-24">' +
+            '<h1 class="text-4xl font-bold mb-8" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h1>' +
+            '<div class="text-base leading-relaxed" style="color:var(--color-primary);opacity:0.85;white-space:pre-wrap;">' + parsed + '</div>' +
+          '</section>';
         }
 
         function buildHeaderHtml(config) {

@@ -1,0 +1,57 @@
+---
+interface Props {
+  title: string;
+  content: string | null;
+}
+
+const { title, content } = Astro.props;
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttr(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/'/g, "&#39;")
+    .replace(/"/g, "&quot;");
+}
+
+function parseContent(raw: string): string {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let result = "";
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = linkRegex.exec(raw)) !== null) {
+    result += escapeHtml(raw.slice(lastIndex, match.index));
+    const linkText = escapeHtml(match[1]);
+    const linkUrl = escapeAttr(match[2]);
+    result += `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;opacity:1;">${linkText}</a>`;
+    lastIndex = match.index + match[0].length;
+  }
+  result += escapeHtml(raw.slice(lastIndex));
+  return result;
+}
+
+const parsedContent = content ? parseContent(content) : null;
+---
+
+{parsedContent && (
+  <section data-component="legal" class="px-6 md:px-16 py-16 md:py-24">
+    <h1
+      class="text-4xl font-bold mb-8"
+      style="color: var(--color-primary); font-family: var(--title-font);"
+    >
+      {title}
+    </h1>
+    <div
+      class="text-base leading-relaxed"
+      style="color: var(--color-primary); opacity: 0.85; white-space: pre-wrap;"
+      set:html={parsedContent}
+    />
+  </section>
+)}
