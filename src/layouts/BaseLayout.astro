@@ -382,7 +382,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               '<section data-component="cta" class="' + sectionClass + '" style="min-height:500px;">' +
                 '<div class="' + innerClass + '">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
-                  '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);">' + escapeHtml(title) + '</h2>' +
+                  '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +
                   '<p class="text-lg mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
                   buttonsHtmlFinal +
                 '</div>' +
@@ -398,7 +398,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div class="w-full md:w-1/2" style="min-height:300px;background-color:var(--color-secondary);"></div>' +
                 '<div class="flex flex-col justify-center px-10 py-12 w-full md:w-1/2 bg-white">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
-                  '<h2 class="text-3xl font-bold mb-4" style="color:var(--color-primary);">' + escapeHtml(title) + '</h2>' +
+                  '<h2 class="text-3xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +
                   '<p class="text-base mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
                   primaryBtn2 +
                 '</div>' +
