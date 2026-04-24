@@ -26,6 +26,7 @@ export interface SitePage {
   site_id: string;
   title: string;
   slug: string;
+  content: string | null;
   position: number;
   visible: boolean;
   show_in_nav: boolean;
@@ -48,7 +49,7 @@ export interface SiteComponent {
   type: string;
   position: number;
   visible: boolean;
-  config: HeaderSlide[] | unknown[];
+  config: unknown;
   created_at: string;
   updated_at: string;
 }
