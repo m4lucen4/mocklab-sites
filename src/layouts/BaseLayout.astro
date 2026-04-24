@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import type { Site, SitePage } from "../types";
 import Navigation from "../components/Navigation.astro";
+import Footer from "../components/Footer.astro";
 
 interface Props {
   site: Site;
@@ -124,6 +125,24 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 // Re-render navigation with fresh data
                 var navPages = pages.filter(function (p) { return p.show_in_nav; });
                 renderNavigation(site, navPages, slug, pageSlug || "home");
+
+                // Update footer with fresh data
+                var footerYear = document.querySelector('[data-footer-year]');
+                if (footerYear) footerYear.textContent = String(new Date().getFullYear());
+
+                var footerWrap = document.querySelector('[data-footer-logo-wrap]');
+                if (footerWrap) {
+                  if (site.logo_url) {
+                    var img = footerWrap.querySelector('[data-footer-logo]');
+                    if (img) {
+                      img.src = site.logo_url;
+                      img.alt = site.studio_name || '';
+                    }
+                  } else {
+                    var footerStudio = footerWrap.querySelector('[data-footer-studio]');
+                    if (footerStudio && site.studio_name) footerStudio.textContent = site.studio_name;
+                  }
+                }
 
                 // Find current page and fetch its components
                 var currentPage = pages.find(function (p) { return p.slug === (pageSlug || "home"); });
@@ -356,7 +375,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var isLeft = type === 3;
             var primaryBtn = buildLink(
               config.url_primary_button, config.text_primary_button,
-              'inline-block px-8 py-3 font-semibold text-white rounded',
+              'inline-block px-8 py-3 font-semibold text-white rounded-full',
               'background-color:var(--color-primary);'
             );
             var secondaryBtn = '';
@@ -576,5 +595,6 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     <main id="page-content">
       <slot />
     </main>
+    <Footer site={site} siteSlug={site.slug} />
   </body>
 </html>
