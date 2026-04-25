@@ -688,8 +688,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           fetch(PUBLIC_SUPABASE_URL + '/functions/v1/contact', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug: slug, nombre: nombre, compania: compania, email: email, mensaje: mensaje }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + PUBLIC_SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({ slug: slug, nombre: nombre, compania: compania, email: email, mensaje: mensaje, website: honeypot }),
           })
             .then(function (r) { return r.json(); })
             .then(function (res) {
