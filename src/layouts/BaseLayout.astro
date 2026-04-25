@@ -623,6 +623,9 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
             var formHtml =
               '<form data-contact-form class="flex flex-col gap-4">' +
+                '<div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">' +
+                  '<input type="text" name="website" tabindex="-1" autocomplete="off" />' +
+                '</div>' +
                 '<div><label style="' + labelStyle + '">Nombre *</label>' +
                   '<input type="text" name="nombre" required style="' + inputStyle + '" /></div>' +
                 '<div><label style="' + labelStyle + '">Compañía</label>' +
@@ -641,6 +644,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div class="flex items-center gap-4">' +
                   '<button type="submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">Enviar mensaje</button>' +
                   '<span data-contact-success style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">¡Mensaje enviado correctamente!</span>' +
+                  '<span data-contact-error style="display:none;font-size:0.875rem;color:#e53e3e;">Ha ocurrido un error. Por favor, inténtalo de nuevo.</span>' +
                 '</div>' +
               '</form>';
 
@@ -660,14 +664,46 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var form = e.target.closest('[data-contact-form]');
           if (!form) return;
           e.preventDefault();
+
           var btn = form.querySelector('button[type="submit"]');
           var successMsg = form.querySelector('[data-contact-success]');
-          if (btn) btn.disabled = true;
-          // TODO: connect to a real endpoint when available
-          setTimeout(function () {
+          var errorMsg = form.querySelector('[data-contact-error]');
+
+          var honeypot = (form.querySelector('[name="website"]') || {}).value || '';
+          var nombre   = (form.querySelector('[name="nombre"]')   || {}).value || '';
+          var compania = (form.querySelector('[name="compania"]')  || {}).value || '';
+          var email    = (form.querySelector('[name="email"]')     || {}).value || '';
+          var mensaje  = (form.querySelector('[name="mensaje"]')   || {}).value || '';
+          var slug     = document.documentElement.getAttribute('data-slug') || '';
+
+          // Honeypot: si el campo oculto tiene valor es un bot — simular éxito y salir
+          if (honeypot) {
             if (btn) btn.style.display = 'none';
             if (successMsg) successMsg.style.display = 'block';
-          }, 400);
+            return;
+          }
+
+          if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+          if (errorMsg) errorMsg.style.display = 'none';
+
+          fetch(PUBLIC_SUPABASE_URL + '/functions/v1/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: slug, nombre: nombre, compania: compania, email: email, mensaje: mensaje }),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+              if (res.ok) {
+                if (btn) btn.style.display = 'none';
+                if (successMsg) successMsg.style.display = 'block';
+              } else {
+                throw new Error(res.error || 'Error');
+              }
+            })
+            .catch(function () {
+              if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+              if (errorMsg) errorMsg.style.display = 'block';
+            });
         });
 
         function initCarousel(carousel) {
