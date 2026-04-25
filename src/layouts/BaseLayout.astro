@@ -447,7 +447,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             );
             html =
               '<section data-component="cta" class="flex flex-col md:flex-row w-full" style="min-height:400px;">' +
-                '<div class="w-full md:w-1/2" style="min-height:300px;background-color:var(--color-secondary);"></div>' +
+                '<div class="w-full md:w-1/2" style="min-height:300px;background-color:' + escapeAttr(config.split_color || 'var(--color-secondary)') + ';"></div>' +
                 '<div class="flex flex-col justify-center px-10 py-12 w-full md:w-1/2 bg-white">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
                   '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +
@@ -697,6 +697,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             .then(function (r) { return r.json(); })
             .then(function (res) {
               if (res.ok) {
+                form.reset();
                 if (btn) btn.style.display = 'none';
                 if (successMsg) successMsg.style.display = 'block';
               } else {
