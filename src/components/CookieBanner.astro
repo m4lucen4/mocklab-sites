@@ -1,0 +1,291 @@
+---
+// Cookie banner — RGPD / LSSI compliant
+// Consent is stored in localStorage keyed by site slug.
+// Categories: necessary (always on), analytics, marketing.
+---
+
+<!-- ── Cookie Banner ─────────────────────────────────────────── -->
+<div
+  id="cookie-banner"
+  role="dialog"
+  aria-modal="false"
+  aria-label="Aviso de cookies"
+  class="fixed bottom-0 left-0 right-0 z-9000 px-6 md:px-16 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
+  style="display:none; background-color:var(--color-secondary); border-top:1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);"
+>
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8" style="max-width:1400px; margin:0 auto;">
+    <p class="text-sm leading-relaxed m-0 max-w-2xl" style="color:var(--color-primary); opacity:0.85;">
+      Usamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y mostrarte contenido relevante.
+      Puedes aceptarlas, rechazarlas o configurar tus preferencias.
+      <a id="cookie-policy-link" href="#" class="underline" style="color:var(--color-primary);">Política de cookies</a>.
+    </p>
+    <div class="flex flex-wrap gap-2 shrink-0">
+      <button id="cookie-reject-all" class="cookie-btn-outline text-xs font-semibold px-5 py-2 rounded-full cursor-pointer transition-opacity hover:opacity-80 whitespace-nowrap" style="color:var(--color-primary);">
+        Rechazar todas
+      </button>
+      <button id="cookie-customize" class="cookie-btn-outline text-xs font-semibold px-5 py-2 rounded-full cursor-pointer transition-opacity hover:opacity-80 whitespace-nowrap" style="color:var(--color-primary);">
+        Personalizar
+      </button>
+      <button id="cookie-accept-all" class="text-xs font-semibold px-5 py-2 rounded-full cursor-pointer transition-opacity hover:opacity-80 whitespace-nowrap" style="background-color:var(--color-primary); color:var(--color-secondary);">
+        Aceptar todas
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Preferences Modal ─────────────────────────────────────── -->
+<div
+  id="cookie-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cookie-modal-title"
+  class="fixed inset-0 z-9100 items-center justify-center p-4 bg-black/50"
+  style="display:none;"
+>
+  <div class="rounded-xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" style="background-color:var(--color-secondary);">
+    <h2 id="cookie-modal-title" class="text-xl font-bold mb-3" style="color:var(--color-primary); font-family:var(--title-font);">
+      Configurar cookies
+    </h2>
+    <p class="text-sm leading-relaxed mb-6" style="color:var(--color-primary); opacity:0.75;">
+      Selecciona qué categorías de cookies deseas permitir. Las cookies necesarias siempre están activas porque el sitio no puede funcionar correctamente sin ellas.
+    </p>
+
+    <ul class="flex flex-col gap-3 p-0 m-0 list-none mb-6">
+      <!-- Necessary — always on -->
+      <li class="p-4 rounded-lg" style="border:1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold" style="color:var(--color-primary);">Necesarias</span>
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full" style="color:var(--color-primary); opacity:0.5; background:color-mix(in srgb, var(--color-primary) 10%, transparent);">
+            Siempre activas
+          </span>
+        </div>
+        <p class="text-xs leading-relaxed m-0" style="color:var(--color-primary); opacity:0.65;">
+          Imprescindibles para el funcionamiento básico del sitio. No pueden desactivarse.
+        </p>
+      </li>
+
+      <!-- Analytics -->
+      <li class="p-4 rounded-lg" style="border:1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold" style="color:var(--color-primary);">Analíticas</span>
+          <button
+            type="button"
+            id="toggle-analytics"
+            role="switch"
+            aria-checked="false"
+            aria-label="Activar cookies analíticas"
+            class="cookie-toggle relative inline-flex shrink-0 cursor-pointer rounded-full transition-colors duration-200"
+            style="width:2.5rem;height:1.375rem;background:color-mix(in srgb, var(--color-primary) 20%, transparent);"
+          >
+            <span class="cookie-toggle__knob absolute top-0.75 left-0.75 rounded-full transition-all duration-200" style="width:1rem;height:1rem;background:var(--color-primary);opacity:0.4;"></span>
+          </button>
+        </div>
+        <p class="text-xs leading-relaxed m-0" style="color:var(--color-primary); opacity:0.65;">
+          Nos ayudan a entender cómo interactúas con el sitio, qué páginas visitas y cómo llegaste. La información es anónima.
+        </p>
+      </li>
+
+      <!-- Marketing -->
+      <li class="p-4 rounded-lg" style="border:1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold" style="color:var(--color-primary);">Marketing</span>
+          <button
+            type="button"
+            id="toggle-marketing"
+            role="switch"
+            aria-checked="false"
+            aria-label="Activar cookies de marketing"
+            class="cookie-toggle relative inline-flex shrink-0 cursor-pointer rounded-full transition-colors duration-200"
+            style="width:2.5rem;height:1.375rem;background:color-mix(in srgb, var(--color-primary) 20%, transparent);"
+          >
+            <span class="cookie-toggle__knob absolute top-0.75 left-0.75 rounded-full transition-all duration-200" style="width:1rem;height:1rem;background:var(--color-primary);opacity:0.4;"></span>
+          </button>
+        </div>
+        <p class="text-xs leading-relaxed m-0" style="color:var(--color-primary); opacity:0.65;">
+          Permiten mostrarte anuncios y contenido personalizado basado en tus intereses dentro y fuera del sitio.
+        </p>
+      </li>
+    </ul>
+
+    <div class="flex flex-wrap gap-2 justify-end">
+      <button id="cookie-modal-cancel" class="cookie-btn-outline text-xs font-semibold px-5 py-2 rounded-full cursor-pointer transition-opacity hover:opacity-80" style="color:var(--color-primary);">
+        Cancelar
+      </button>
+      <button id="cookie-modal-save" class="text-xs font-semibold px-5 py-2 rounded-full cursor-pointer transition-opacity hover:opacity-80" style="background-color:var(--color-primary); color:var(--color-secondary);">
+        Guardar preferencias
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Outline button border — can't express color-mix via Tailwind arbitrary values cleanly */
+  .cookie-btn-outline {
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+  .cookie-btn-outline:hover {
+    border-color: var(--color-primary);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var STORAGE_KEY_PREFIX = "cookieconsent_v1_";
+
+    function getSiteSlug() {
+      return document.documentElement.getAttribute("data-slug") || "default";
+    }
+
+    function storageKey() {
+      return STORAGE_KEY_PREFIX + getSiteSlug();
+    }
+
+    function getConsent() {
+      try {
+        var raw = localStorage.getItem(storageKey());
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveConsent(analytics, marketing) {
+      var consent = {
+        necessary: true,
+        analytics: !!analytics,
+        marketing: !!marketing,
+        timestamp: Date.now(),
+      };
+      try {
+        localStorage.setItem(storageKey(), JSON.stringify(consent));
+      } catch (e) {}
+      document.dispatchEvent(new CustomEvent("cookieConsentUpdated", { detail: consent }));
+      return consent;
+    }
+
+    function hideBanner() {
+      var banner = document.getElementById("cookie-banner");
+      if (banner) banner.style.display = "none";
+    }
+
+    function hideModal() {
+      var modal = document.getElementById("cookie-modal");
+      if (modal) modal.style.display = "none";
+    }
+
+    function setToggle(btn, checked) {
+      var knob = btn.querySelector(".cookie-toggle__knob");
+      btn.setAttribute("aria-checked", checked ? "true" : "false");
+      if (checked) {
+        btn.style.background = "var(--color-primary)";
+        if (knob) {
+          knob.style.transform = "translateX(1.125rem)";
+          knob.style.background = "var(--color-secondary)";
+          knob.style.opacity = "1";
+        }
+      } else {
+        btn.style.background = "color-mix(in srgb, var(--color-primary) 20%, transparent)";
+        if (knob) {
+          knob.style.transform = "";
+          knob.style.background = "var(--color-primary)";
+          knob.style.opacity = "0.4";
+        }
+      }
+    }
+
+    function isToggleOn(id) {
+      var btn = document.getElementById(id);
+      return btn ? btn.getAttribute("aria-checked") === "true" : false;
+    }
+
+    function showModal() {
+      var modal = document.getElementById("cookie-modal");
+      if (!modal) return;
+      var consent = getConsent();
+      if (consent) {
+        var analyticsBtn = document.getElementById("toggle-analytics");
+        var marketingBtn = document.getElementById("toggle-marketing");
+        if (analyticsBtn) setToggle(analyticsBtn, !!consent.analytics);
+        if (marketingBtn) setToggle(marketingBtn, !!consent.marketing);
+      }
+      modal.style.display = "flex";
+    }
+
+    function updatePolicyLink() {
+      var slug = getSiteSlug();
+      var link = document.getElementById("cookie-policy-link");
+      if (link && slug) link.href = "/" + slug + "/politica-cookies";
+    }
+
+    function init() {
+      updatePolicyLink();
+
+      // Show banner only if no consent yet
+      if (!getConsent()) {
+        var banner = document.getElementById("cookie-banner");
+        if (banner) banner.style.display = "block";
+
+        document.getElementById("cookie-accept-all").addEventListener("click", function () {
+          saveConsent(true, true);
+          hideBanner();
+        });
+
+        document.getElementById("cookie-reject-all").addEventListener("click", function () {
+          saveConsent(false, false);
+          hideBanner();
+        });
+
+        document.getElementById("cookie-customize").addEventListener("click", showModal);
+      }
+
+      // Toggle buttons — always wired up
+      var analyticsBtn = document.getElementById("toggle-analytics");
+      var marketingBtn = document.getElementById("toggle-marketing");
+
+      if (analyticsBtn) {
+        analyticsBtn.addEventListener("click", function () {
+          setToggle(analyticsBtn, analyticsBtn.getAttribute("aria-checked") !== "true");
+        });
+      }
+      if (marketingBtn) {
+        marketingBtn.addEventListener("click", function () {
+          setToggle(marketingBtn, marketingBtn.getAttribute("aria-checked") !== "true");
+        });
+      }
+
+      document.getElementById("cookie-modal-cancel").addEventListener("click", hideModal);
+
+      document.getElementById("cookie-modal-save").addEventListener("click", function () {
+        saveConsent(isToggleOn("toggle-analytics"), isToggleOn("toggle-marketing"));
+        hideModal();
+        hideBanner();
+      });
+
+      var modal = document.getElementById("cookie-modal");
+      if (modal) {
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) hideModal();
+        });
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") hideModal();
+      });
+
+      // Any element with data-cookie-settings anywhere in the page opens the modal
+      document.addEventListener("click", function (e) {
+        if (e.target && e.target.closest("[data-cookie-settings]")) {
+          e.preventDefault();
+          showModal();
+        }
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  })();
+</script>

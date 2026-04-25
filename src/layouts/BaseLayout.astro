@@ -3,6 +3,7 @@ import "../styles/global.css";
 import type { Site, SitePage } from "../types";
 import Navigation from "../components/Navigation.astro";
 import Footer from "../components/Footer.astro";
+import CookieBanner from "../components/CookieBanner.astro";
 
 interface Props {
   site: Site;
@@ -627,5 +628,6 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
       <slot />
     </main>
     <Footer site={site} siteSlug={site.slug} />
+    <CookieBanner />
   </body>
 </html>
