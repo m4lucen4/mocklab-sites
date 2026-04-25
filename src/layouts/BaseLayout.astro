@@ -175,6 +175,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                         if (comp.type === 'cta') pageHtml += buildCTAHtml(comp.config);
                         if (comp.type === 'body') pageHtml += buildBodyHtml(comp.config);
                         if (comp.type === 'content') pageHtml += buildContentHtml(comp.config);
+                        if (comp.type === 'contact') pageHtml += buildContactHtml(comp.config, site);
                       });
                     }
 
@@ -563,6 +564,111 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             '</section>';
           }
         }
+
+        function buildContactHtml(config, site) {
+          if (!config) return '';
+
+          var type = config.type || 1;
+          var antetitulo = config.antetitulo || '';
+          var titulo = config.titulo || '';
+          var descripcion = config.descripcion || '';
+          var direccion1 = config.direccion1 || '';
+          var direccion2 = config.direccion2 || '';
+
+          var antetituloHtml = antetitulo
+            ? '<p class="text-xs font-semibold tracking-[0.2em] mb-3" style="color:var(--color-primary);">' + escapeHtml(antetitulo) + '</p>'
+            : '';
+
+          var tituloHtml = titulo
+            ? '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(titulo) + '</h2>'
+            : '';
+
+          var descripcionHtml = descripcion
+            ? '<p class="text-base leading-relaxed" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(descripcion) + '</p>'
+            : '';
+
+          var inputStyle = 'width:100%;padding:0.625rem 1rem;font-size:0.875rem;border-radius:0.5rem;background:#ffffff;color:var(--color-primary);border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);outline:none;font-family:var(--font-family);';
+          var labelStyle = 'display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;margin-bottom:0.375rem;color:var(--color-primary);';
+          var locationLabelStyle = 'display:block;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;color:var(--color-primary);opacity:0.45;';
+
+          if (type === 1) {
+            var socialsHtml = site ? buildSocialsHtml(site) : '';
+            var socialsRow = socialsHtml
+              ? '<div class="flex items-center gap-4 mt-6">' + socialsHtml + '</div>'
+              : '';
+
+            var dir1Html = direccion1
+              ? '<span style="' + locationLabelStyle + '">Localización 1</span>' +
+                '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion1) + '</p>'
+              : '';
+            var dir2Html = direccion2
+              ? '<span style="' + locationLabelStyle + '">Localización 2</span>' +
+                '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion2) + '</p>'
+              : '';
+
+            return '<section data-component="contact" class="px-6 md:px-16 py-16 md:py-24">' +
+              '<div class="flex flex-col md:flex-row gap-12 md:gap-8">' +
+                '<div class="w-full md:w-1/2">' + antetituloHtml + tituloHtml + descripcionHtml + socialsRow + '</div>' +
+                '<div class="w-full md:w-1/4 self-center">' + dir1Html + '</div>' +
+                '<div class="w-full md:w-1/4 self-center">' + dir2Html + '</div>' +
+              '</div>' +
+            '</section>';
+          } else {
+            var dir1Html2 = direccion1
+              ? '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:1.5rem 0 0;">' + escapeHtml(direccion1) + '</p>'
+              : '';
+
+            var siteSlug = (site && site.slug) ? site.slug : '';
+            var avisoLegalHref = siteSlug ? '/' + escapeAttr(siteSlug) + '/aviso-legal' : '/aviso-legal';
+
+            var formHtml =
+              '<form data-contact-form class="flex flex-col gap-4">' +
+                '<div><label style="' + labelStyle + '">Nombre *</label>' +
+                  '<input type="text" name="nombre" required style="' + inputStyle + '" /></div>' +
+                '<div><label style="' + labelStyle + '">Compañía</label>' +
+                  '<input type="text" name="compania" style="' + inputStyle + '" /></div>' +
+                '<div><label style="' + labelStyle + '">Email *</label>' +
+                  '<input type="email" name="email" required style="' + inputStyle + '" /></div>' +
+                '<div><label style="' + labelStyle + '">Mensaje</label>' +
+                  '<textarea name="mensaje" rows="4" style="' + inputStyle + 'resize:none;"></textarea></div>' +
+                '<div style="display:flex;align-items:flex-start;gap:0.625rem;">' +
+                  '<input type="checkbox" name="privacidad" id="contact-privacidad" required style="margin-top:0.2rem;accent-color:var(--color-primary);flex-shrink:0;width:1rem;height:1rem;cursor:pointer;" />' +
+                  '<label for="contact-privacidad" style="font-size:0.8125rem;line-height:1.5;color:var(--color-primary);opacity:0.75;cursor:pointer;">' +
+                    'He leído y acepto la ' +
+                    '<a href="' + avisoLegalHref + '" style="color:var(--color-primary);text-decoration:underline;opacity:1;">política de privacidad</a>' +
+                  '</label>' +
+                '</div>' +
+                '<div class="flex items-center gap-4">' +
+                  '<button type="submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">Enviar mensaje</button>' +
+                  '<span data-contact-success style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">¡Mensaje enviado correctamente!</span>' +
+                '</div>' +
+              '</form>';
+
+            return '<section data-component="contact" class="flex flex-col md:flex-row" style="min-height:600px;">' +
+              '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20">' +
+                tituloHtml + descripcionHtml + dir1Html2 +
+              '</div>' +
+              '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20" style="background-color:' + escapeAttr(config.form_bg_color || '#ffffff') + ';">' +
+                formHtml +
+              '</div>' +
+            '</section>';
+          }
+        }
+
+        // Delegated handler for contact forms injected dynamically
+        document.addEventListener('submit', function (e) {
+          var form = e.target.closest('[data-contact-form]');
+          if (!form) return;
+          e.preventDefault();
+          var btn = form.querySelector('button[type="submit"]');
+          var successMsg = form.querySelector('[data-contact-success]');
+          if (btn) btn.disabled = true;
+          // TODO: connect to a real endpoint when available
+          setTimeout(function () {
+            if (btn) btn.style.display = 'none';
+            if (successMsg) successMsg.style.display = 'block';
+          }, 400);
+        });
 
         function initCarousel(carousel) {
           var slides = carousel.querySelectorAll("[data-slide-index]");
