@@ -9,7 +9,11 @@ interface Props {
 
 const { projects, siteSlug, layout = "grid-4" } = Astro.props;
 
-// Extract unique keywords for filter buttons
+function truncate(text: string, maxWords = 20): string {
+  const words = text.trim().split(/\s+/);
+  return words.length <= maxWords ? text : words.slice(0, maxWords).join(" ") + "…";
+}
+
 const allKeywords = Array.from(
   new Set(
     projects
@@ -20,39 +24,52 @@ const allKeywords = Array.from(
   )
 );
 
-// Helper: get col-span class for alternating layout
 function getAlternatingSpan(index: number): string {
   const groupIndex = Math.floor(index / 3);
   const posInGroup = index % 3;
   const isEvenGroup = groupIndex % 2 === 0;
-
   if (isEvenGroup) {
-    // Pattern: small, small, large (1/4, 1/4, 1/2)
     return posInGroup === 2 ? "col-span-6" : "col-span-3";
   } else {
-    // Pattern: large, small, small (1/2, 1/4, 1/4)
     return posInGroup === 0 ? "col-span-6" : "col-span-3";
   }
+}
+
+function getAlternatingAspect(index: number): string {
+  const groupIndex = Math.floor(index / 3);
+  const posInGroup = index % 3;
+  const isEvenGroup = groupIndex % 2 === 0;
+  const isWide = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
+  return isWide ? "aspect-3/2" : "aspect-3/4";
 }
 ---
 
 <section data-preserve class="pt-24 pb-20 px-6 md:px-16">
   <div class="max-w-7xl mx-auto">
 
-    <!-- Header: title + filter buttons -->
-    <div class="flex items-center justify-between mb-10 gap-6">
-      <h1 class="text-4xl font-bold text-neutral-900 tracking-wide" style="font-family: var(--title-font);">Portfolio</h1>
+    <div class="flex items-start justify-between mb-10 gap-6">
+      <h1 class="text-4xl font-bold text-neutral-900 tracking-wide shrink-0" style="font-family: var(--title-font);">Proyectos</h1>
 
       {allKeywords.length > 0 && (
-        <div class="flex items-center gap-3 flex-wrap justify-end" id="filter-buttons">
-          {allKeywords.map((kw) => (
-            <button
-              class="filter-btn px-3 py-1.5 text-xs font-semibold bg-black text-white border border-black hover:bg-white hover:text-black transition-colors"
-              data-filter={kw}
+        <div class="flex flex-col items-end gap-3">
+          <!-- Select -->
+          <div class="relative">
+            <select
+              id="keyword-select"
+              class="appearance-none pl-3 pr-8 py-1.5 text-xs font-semibold border border-neutral-900 bg-white text-neutral-900 cursor-pointer focus:outline-none"
+              style="font-family: var(--font-family);"
             >
-              {kw}
-            </button>
-          ))}
+              <option value="">Filtrar por categoría</option>
+              {allKeywords.map((kw) => (
+                <option value={kw}>{kw}</option>
+              ))}
+            </select>
+            <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-900">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </span>
+          </div>
+          <!-- Active pills -->
+          <div id="active-pills" class="flex flex-wrap gap-2 justify-end"></div>
         </div>
       )}
     </div>
@@ -73,17 +90,22 @@ function getAlternatingSpan(index: number): string {
                 {coverImage ? (
                   <img
                     src={coverImage}
-                    alt={project.titulo}
+                    alt={project.title}
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div class="w-full h-full bg-[#e8e3d8]" />
                 )}
               </div>
-              <p class="text-sm text-neutral-900 mb-1">{project.titulo}</p>
-              <p class="text-xs font-bold text-neutral-900">
-                {[project.keywords, project.year].filter(Boolean).join(" | ")}
-              </p>
+              <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
+              {project.description && (
+                <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">{truncate(project.description)}</p>
+              )}
+              {(project.category || project.year) && (
+                <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
+                  {[project.category, project.year].filter(Boolean).join(" | ")}
+                </p>
+              )}
             </a>
           );
         })}
@@ -96,6 +118,7 @@ function getAlternatingSpan(index: number): string {
         {projects.map((project, index) => {
           const coverImage = project.image_data?.find((img) => img.url)?.url;
           const span = getAlternatingSpan(index);
+          const aspect = getAlternatingAspect(index);
           const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
           return (
             <a
@@ -103,26 +126,28 @@ function getAlternatingSpan(index: number): string {
               class:list={["project-card group block", span]}
               data-keywords={keywords.join(",")}
             >
-              <div class="aspect-3/4 overflow-hidden bg-neutral-100 mb-4">
+              <div class:list={[aspect, "overflow-hidden bg-neutral-100 mb-4"]}>
                 {coverImage ? (
                   <img
                     src={coverImage}
-                    alt={project.titulo}
+                    alt={project.title}
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div class="w-full h-full bg-[#e8e3d8]" />
                 )}
               </div>
-              <p class="text-sm text-neutral-900 mb-2">{project.titulo}</p>
-              {project.descripcion && (
-                <p class="text-xs text-neutral-500 mb-3 leading-relaxed line-clamp-4">
-                  {project.descripcion}
+              <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
+              {project.description && (
+                <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">
+                  {truncate(project.description)}
                 </p>
               )}
-              <p class="text-xs font-bold text-neutral-900">
-                {[project.keywords, project.year].filter(Boolean).join(" | ")}
-              </p>
+              {(project.category || project.year) && (
+                <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
+                  {[project.category, project.year].filter(Boolean).join(" | ")}
+                </p>
+              )}
             </a>
           );
         })}
@@ -135,46 +160,52 @@ function getAlternatingSpan(index: number): string {
   .project-card.hidden-by-filter {
     display: none;
   }
-  .filter-btn.active {
-    background-color: white;
-    color: black;
-  }
-  .filter-btn.active:hover {
-    background-color: black;
-    color: white;
-  }
 </style>
 
 <script>
-  const filterButtons = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+  const select = document.getElementById("keyword-select") as HTMLSelectElement | null;
+  const pillsContainer = document.getElementById("active-pills");
   const projectCards = document.querySelectorAll<HTMLElement>(".project-card");
 
-  let activeFilter: string | null = null;
+  const activeFilters = new Set<string>();
 
-  filterButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const filter = btn.dataset.filter ?? null;
-
-      if (activeFilter === filter) {
-        // Deselect
-        activeFilter = null;
-        filterButtons.forEach((b) => b.classList.remove("active"));
-        projectCards.forEach((card) => card.classList.remove("hidden-by-filter"));
+  function applyFilters() {
+    projectCards.forEach((card) => {
+      if (activeFilters.size === 0) {
+        card.classList.remove("hidden-by-filter");
         return;
       }
-
-      activeFilter = filter;
-      filterButtons.forEach((b) => {
-        b.classList.toggle("active", b.dataset.filter === filter);
-      });
-
-      projectCards.forEach((card) => {
-        const cardKeywords = (card.dataset.keywords ?? "")
-          .split(",")
-          .map((k) => k.trim());
-        const matches = filter ? cardKeywords.includes(filter) : true;
-        card.classList.toggle("hidden-by-filter", !matches);
-      });
+      const cardKeywords = (card.dataset.keywords ?? "").split(",").map((k) => k.trim());
+      const matches = [...activeFilters].some((f) => cardKeywords.includes(f));
+      card.classList.toggle("hidden-by-filter", !matches);
     });
+  }
+
+  function addPill(keyword: string) {
+    if (activeFilters.has(keyword)) return;
+    activeFilters.add(keyword);
+
+    const pill = document.createElement("span");
+    pill.className = "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-neutral-900 text-white";
+    pill.style.fontFamily = "var(--font-family)";
+    pill.dataset.keyword = keyword;
+    pill.innerHTML = `${keyword}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Eliminar filtro ${keyword}">✕</button>`;
+
+    pill.querySelector("button")!.addEventListener("click", () => {
+      activeFilters.delete(keyword);
+      pill.remove();
+      applyFilters();
+    });
+
+    pillsContainer?.appendChild(pill);
+    applyFilters();
+  }
+
+  select?.addEventListener("change", () => {
+    const value = select.value;
+    if (value) {
+      addPill(value);
+      select.value = "";
+    }
   });
 </script>

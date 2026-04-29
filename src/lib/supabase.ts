@@ -3,8 +3,11 @@ import type { Site, SitePage, SiteComponent, Project } from "../types";
 
 const supabaseUrl = import.meta.env.SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Server-side client: bypasses RLS for reads from SSR pages
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function getSiteBySlug(slug: string): Promise<Site | null> {
   const { data, error } = await supabase
@@ -53,7 +56,7 @@ export async function getPageComponents(pageId: string): Promise<SiteComponent[]
 }
 
 export async function getUserProjects(userId: string): Promise<Project[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("projects")
     .select("*")
     .eq("user", userId);

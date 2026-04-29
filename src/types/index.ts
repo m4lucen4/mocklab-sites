@@ -65,9 +65,10 @@ export interface BodyConfig {
 export interface Project {
   id: string;
   user: string;
-  titulo: string;
-  descripcion: string;
+  title: string;
+  description: string;
   keywords: string;
+  category: string | null;
   year: string;
   image_data: Array<{
     url: string;
