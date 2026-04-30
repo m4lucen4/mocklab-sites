@@ -24,24 +24,7 @@ const allKeywords = Array.from(
   )
 );
 
-function getAlternatingSpan(index: number): string {
-  const groupIndex = Math.floor(index / 3);
-  const posInGroup = index % 3;
-  const isEvenGroup = groupIndex % 2 === 0;
-  if (isEvenGroup) {
-    return posInGroup === 2 ? "col-span-6" : "col-span-3";
-  } else {
-    return posInGroup === 0 ? "col-span-6" : "col-span-3";
-  }
-}
 
-function getAlternatingAspect(index: number): string {
-  const groupIndex = Math.floor(index / 3);
-  const posInGroup = index % 3;
-  const isEvenGroup = groupIndex % 2 === 0;
-  const isWide = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
-  return isWide ? "aspect-3/2" : "aspect-3/4";
-}
 ---
 
 <section data-preserve class="pt-24 pb-20 px-6 md:px-16">
@@ -114,11 +97,14 @@ function getAlternatingAspect(index: number): string {
 
     <!-- Grid-alternating layout -->
     {layout === "grid-alternating" && (
-      <div class="grid grid-cols-12 gap-6" id="projects-grid">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6" id="projects-grid">
         {projects.map((project, index) => {
           const coverImage = project.image_data?.find((img) => img.url)?.url;
-          const span = getAlternatingSpan(index);
-          const aspect = getAlternatingAspect(index);
+          const groupIndex = Math.floor(index / 3);
+          const posInGroup = index % 3;
+          const isEvenGroup = groupIndex % 2 === 0;
+          const isLarge = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
+          const span = isLarge ? "md:col-span-2 lg:col-span-6" : "md:col-span-1 lg:col-span-3";
           const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
           return (
             <a
@@ -126,7 +112,10 @@ function getAlternatingAspect(index: number): string {
               class:list={["project-card group block", span]}
               data-keywords={keywords.join(",")}
             >
-              <div class:list={[aspect, "overflow-hidden bg-neutral-100 mb-4"]}>
+              <div class:list={[
+                isLarge ? "aspect-3/2" : "aspect-[5/7]",
+                "overflow-hidden bg-neutral-100 mb-4"
+              ]}>
                 {coverImage ? (
                   <img
                     src={coverImage}
