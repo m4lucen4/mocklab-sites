@@ -8,47 +8,146 @@ interface Props {
 
 const { project, siteSlug } = Astro.props;
 const images = (project.image_data || []).filter((img) => img.url);
+const heroImage = images[0];
+const galleryImages = images.slice(1);
+const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
+
+// Group gallery into rows: first image solo, then pairs, trailing solo if odd
+type GalleryRow =
+  | { type: "solo"; img: (typeof galleryImages)[0] }
+  | { type: "duo"; a: (typeof galleryImages)[0]; b: (typeof galleryImages)[0] };
+
+const galleryRows: GalleryRow[] = [];
+if (galleryImages.length > 0) {
+  galleryRows.push({ type: "solo", img: galleryImages[0] });
+  let i = 1;
+  while (i < galleryImages.length) {
+    if (i + 1 < galleryImages.length) {
+      galleryRows.push({ type: "duo", a: galleryImages[i], b: galleryImages[i + 1] });
+      i += 2;
+    } else {
+      galleryRows.push({ type: "solo", img: galleryImages[i] });
+      i += 1;
+    }
+  }
+}
 ---
 
-<article class="pt-24 pb-16 px-6 md:px-16">
-  <div class="max-w-5xl mx-auto">
+<article data-preserve>
+
+  <!-- Back navigation -->
+  <div class="absolute top-0 left-0 pt-6 px-6 md:px-12 z-10">
     <a
       href={`/${siteSlug}/proyectos`}
-      class="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-[var(--color-primary)] transition-colors mb-8"
+      class="inline-flex items-center gap-2.5 text-white mix-blend-difference transition-opacity hover:opacity-60"
+      style="font-family: var(--font-family);"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      Volver a proyectos
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span class="text-xs tracking-[0.2em] uppercase">Proyectos</span>
     </a>
+  </div>
 
-    <header class="mb-12">
-      <h1 class="text-4xl font-bold tracking-wide uppercase mb-4" style="font-family: var(--title-font);">
-        {project.titulo}
-      </h1>
-      <div class="flex flex-wrap items-center gap-4 text-sm text-neutral-500 mb-6">
-        {project.year && <span>{project.year}</span>}
-        {project.keywords && (
-          <span class="before:content-['·'] before:mr-4">{project.keywords}</span>
+  <!-- Hero image -->
+  {heroImage ? (
+    <div class="relative w-full overflow-hidden bg-neutral-100" style="height: 85vh;">
+      <img
+        src={heroImage.url}
+        alt={project.title}
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-black/10"></div>
+    </div>
+  ) : (
+    <div class="w-full bg-neutral-100" style="height: 40vh;"></div>
+  )}
+
+  <!-- Project info -->
+  <div class="px-6 md:px-12 lg:px-20 mt-14">
+    <div class="max-w-screen-xl mx-auto">
+
+      <!-- Title + meta -->
+      <div class="pb-10 border-b border-neutral-200">
+        <h1
+          class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] uppercase mb-6"
+          style="font-family: var(--title-font);"
+        >
+          {project.title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {project.year && (
+            <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.year}</span>
+          )}
+          {project.category && (
+            <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.category}</span>
+          )}
+          {keywords.length > 0 && (
+            <div class="flex flex-wrap gap-1.5">
+              {keywords.map((kw) => (
+                <span
+                  class="text-[0.6rem] tracking-[0.15em] uppercase px-2.5 py-1 border border-neutral-300 text-neutral-500"
+                  style="font-family: var(--font-family);"
+                >
+                  {kw}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Description -->
+      {project.description && (
+        <div class="mt-10 mb-20">
+          <p
+            class="text-sm text-neutral-600 leading-[1.9]"
+            style="font-family: var(--font-family);"
+          >
+            {project.description}
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  {galleryRows.length > 0 && (
+    <div class="px-6 md:px-12 lg:px-20 pb-28">
+      <div class="max-w-screen-xl mx-auto flex flex-col gap-4">
+        {galleryRows.map((row) =>
+          row.type === "solo" ? (
+            <div class="w-full overflow-hidden bg-neutral-100">
+              <img
+                src={row.img.url}
+                alt={project.title}
+                class="w-full h-auto object-cover"
+                style="max-height: 80vh; object-fit: cover;"
+              />
+            </div>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="overflow-hidden bg-neutral-100">
+                <img
+                  src={row.a.url}
+                  alt={project.title}
+                  class="w-full h-full object-cover aspect-[4/5]"
+                />
+              </div>
+              <div class="overflow-hidden bg-neutral-100">
+                <img
+                  src={row.b.url}
+                  alt={project.title}
+                  class="w-full h-full object-cover aspect-[4/5]"
+                />
+              </div>
+            </div>
+          )
         )}
       </div>
-      {project.descripcion && (
-        <p class="text-base text-neutral-700 leading-relaxed max-w-3xl">
-          {project.descripcion}
-        </p>
-      )}
-    </header>
+    </div>
+  )}
 
-    {images.length > 0 && (
-      <div class="grid grid-cols-1 gap-4">
-        {images.map((img, i) => (
-          <div class="overflow-hidden">
-            <img
-              src={img.url}
-              alt={`${project.titulo} - Imagen ${i + 1}`}
-              class="w-full h-auto object-cover"
-            />
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
 </article>
