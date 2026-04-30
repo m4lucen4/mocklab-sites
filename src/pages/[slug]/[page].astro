@@ -35,6 +35,21 @@ if (currentPage.slug === "proyectos") {
 
 const projectListComp = components.find((c) => c.type === "project_list");
 const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
+const projectOrder: string[] = (projectListComp?.config as any)?.project_order ?? [];
+
+if (projectOrder.length > 0) {
+  const orderMap = new Map(projectOrder.map((id, i) => [String(id), i]));
+  projects.sort((a, b) => {
+    const ai = orderMap.get(String(a.id));
+    const bi = orderMap.get(String(b.id));
+    if (ai !== undefined && bi !== undefined) return ai - bi;
+    if (ai !== undefined) return -1;
+    if (bi !== undefined) return 1;
+    return Number(b.id) - Number(a.id);
+  });
+} else {
+  projects.sort((a, b) => Number(b.id) - Number(a.id));
+}
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug={currentPage.slug}>

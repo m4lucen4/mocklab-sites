@@ -75,4 +75,5 @@ export interface Project {
     status?: string;
     processingResult?: unknown;
   }>;
+  created_at?: string;
 }
