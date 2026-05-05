@@ -170,12 +170,19 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
                     var pageHtml = '';
                     if (components) {
+                      var compIndex = 0;
                       components.forEach(function (comp) {
-                        if (comp.type === 'header') pageHtml += buildHeaderHtml(comp.config);
-                        if (comp.type === 'cta') pageHtml += buildCTAHtml(comp.config);
-                        if (comp.type === 'body') pageHtml += buildBodyHtml(comp.config);
-                        if (comp.type === 'content') pageHtml += buildContentHtml(comp.config);
-                        if (comp.type === 'contact') pageHtml += buildContactHtml(comp.config, site);
+                        var compHtml = '';
+                        if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config);
+                        if (comp.type === 'cta') compHtml = buildCTAHtml(comp.config);
+                        if (comp.type === 'body') compHtml = buildBodyHtml(comp.config);
+                        if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
+                        if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
+                        if (compHtml) {
+                          if (compIndex > 0) pageHtml += '<div style="height:2rem;"></div>';
+                          pageHtml += compHtml;
+                          compIndex++;
+                        }
                       });
                     }
 

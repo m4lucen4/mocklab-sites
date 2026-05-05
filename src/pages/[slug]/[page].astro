@@ -36,6 +36,12 @@ if (currentPage.slug === "proyectos") {
 const projectListComp = components.find((c) => c.type === "project_list");
 const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
 const projectOrder: string[] = (projectListComp?.config as any)?.project_order ?? [];
+const hiddenProjects: string[] = (projectListComp?.config as any)?.hidden_projects ?? [];
+
+if (hiddenProjects.length > 0) {
+  const hiddenSet = new Set(hiddenProjects.map(String));
+  projects = projects.filter((p) => !hiddenSet.has(String(p.id)));
+}
 
 if (projectOrder.length > 0) {
   const orderMap = new Map(projectOrder.map((id, i) => [String(id), i]));
@@ -56,7 +62,7 @@ if (projectOrder.length > 0) {
   {isLegal ? (
     <LegalPage title={currentPage.title} content={currentPage.content} />
   ) : (
-    <>
+    <div class="flex flex-col gap-8">
       {components.map((component) => {
         if (component.type === "header") {
           return <Header config={component.config as any} />;
@@ -76,6 +82,6 @@ if (projectOrder.length > 0) {
       {currentPage.slug === "proyectos" && (
         <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} />
       )}
-    </>
+    </div>
   )}
 </BaseLayout>
