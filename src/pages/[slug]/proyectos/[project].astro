@@ -1,7 +1,8 @@
 ---
-import { getSiteBySlug, getSitePages, getUserProjects } from "../../../lib/supabase";
+import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../../lib/supabase";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ProjectDetail from "../../../components/ProjectDetail.astro";
+import type { ProjectListConfig } from "../../../types";
 
 const { slug, project: projectId } = Astro.params;
 
@@ -21,8 +22,15 @@ const project = projects.find((p) => String(p.id) === projectId);
 if (!project) {
   return Astro.redirect('/404');
 }
+
+const proyectosPage = pages.find((p) => p.slug === "proyectos");
+const proyectosComponents = proyectosPage
+  ? await getPageComponents(proyectosPage.id)
+  : [];
+const projectListComp = proyectosComponents.find((c) => c.type === "project_list");
+const detailType: 1 | 2 = ((projectListComp?.config as ProjectListConfig)?.detail_type ?? 1) as 1 | 2;
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug="proyectos">
-  <ProjectDetail project={project} siteSlug={site.slug} />
+  <ProjectDetail project={project} siteSlug={site.slug} detailType={detailType} />
 </BaseLayout>

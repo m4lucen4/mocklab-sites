@@ -4,13 +4,45 @@ import type { Project } from "../types";
 interface Props {
   project: Project;
   siteSlug: string;
+  detailType?: 1 | 2;
 }
 
-const { project, siteSlug } = Astro.props;
+const { project, siteSlug, detailType = 1 } = Astro.props;
+const collaborators = project.projectCollaborators ?? [];
 const images = (project.image_data || []).filter((img) => img.url);
 const heroImage = images[0];
 const galleryImages = images.slice(1);
 const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
+
+// Type 2: split description into paragraphs and build alternating image sections
+// Even sections → "pair" block (2/3 + 1/3, consumes 2 images)
+// Odd sections  → "solo" block (centered 1/2 width, consumes 1 image)
+type ImgItem = (typeof galleryImages)[0];
+type Section =
+  | { kind: "pair"; para: string | null; img1: ImgItem | null; img2: ImgItem | null }
+  | { kind: "solo"; para: string | null; img: ImgItem | null };
+
+const descParagraphs = (project.description ?? "")
+  .split(/\n\n+/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+const remainingImages = galleryImages.slice(2);
+
+const sections: Section[] = [];
+let imgIdx = 0;
+let paraIdx = 0;
+while (imgIdx < remainingImages.length || paraIdx < descParagraphs.length) {
+  const para = descParagraphs[paraIdx] ?? null;
+  paraIdx++;
+  if (sections.length % 2 === 0) {
+    const img1 = remainingImages[imgIdx] ?? null; imgIdx++;
+    const img2 = remainingImages[imgIdx] ?? null; imgIdx++;
+    sections.push({ kind: "pair", para, img1, img2 });
+  } else {
+    const img = remainingImages[imgIdx] ?? null; imgIdx++;
+    sections.push({ kind: "solo", para, img });
+  }
+}
 
 // Group gallery into rows: first image solo, then pairs, trailing solo if odd
 type GalleryRow =
@@ -33,121 +65,267 @@ if (galleryImages.length > 0) {
 }
 ---
 
-<article data-preserve>
+{detailType === 2 ? (
 
-  <!-- Back navigation -->
-  <div class="absolute top-0 left-0 pt-6 px-6 md:px-12 z-10">
-    <a
-      href={`/${siteSlug}/proyectos`}
-      class="inline-flex items-center gap-2.5 text-white mix-blend-difference transition-opacity hover:opacity-60"
-      style="font-family: var(--font-family);"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span class="text-xs tracking-[0.2em] uppercase">Proyectos</span>
-    </a>
-  </div>
+  <article data-preserve>
 
-  <!-- Hero image -->
-  {heroImage ? (
-    <div class="relative w-full overflow-hidden bg-neutral-100" style="height: 85vh;">
-      <img
-        src={heroImage.url}
-        alt={project.title}
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-black/10"></div>
+    <!-- Back navigation -->
+    <div class="pt-8 pb-0 px-6 md:px-12 lg:px-20">
+      <a
+        href={`/${siteSlug}/proyectos`}
+        class="inline-flex items-center gap-2.5 transition-opacity hover:opacity-60"
+        style="font-family: var(--font-family); color: var(--color-primary);"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span class="text-xs tracking-[0.2em] uppercase">Proyectos</span>
+      </a>
     </div>
-  ) : (
-    <div class="w-full bg-neutral-100" style="height: 40vh;"></div>
-  )}
 
-  <!-- Project info -->
-  <div class="px-6 md:px-12 lg:px-20 mt-14">
-    <div class="max-w-screen-xl mx-auto">
-
-      <!-- Title + meta -->
-      <div class="pb-10 border-b border-neutral-200">
+    <!-- Title + year -->
+    <div class="px-6 md:px-12 lg:px-20 pt-12 pb-14">
+      <div class="max-w-screen-xl mx-auto">
         <h1
-          class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] uppercase mb-6"
+          class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1] uppercase mb-4"
           style="font-family: var(--title-font);"
         >
           {project.title}
         </h1>
-
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-          {project.year && (
-            <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.year}</span>
-          )}
-          {project.category && (
-            <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.category}</span>
-          )}
-          {keywords.length > 0 && (
-            <div class="flex flex-wrap gap-1.5">
-              {keywords.map((kw) => (
-                <span
-                  class="text-[0.6rem] tracking-[0.15em] uppercase px-2.5 py-1 border border-neutral-300 text-neutral-500"
-                  style="font-family: var(--font-family);"
-                >
-                  {kw}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <!-- Description -->
-      {project.description && (
-        <div class="mt-10 mb-20">
-          <p
-            class="text-sm text-neutral-600 leading-[1.9]"
-            style="font-family: var(--font-family);"
-          >
-            {project.description}
-          </p>
-        </div>
-      )}
-    </div>
-  </div>
-
-  <!-- Gallery -->
-  {galleryRows.length > 0 && (
-    <div class="px-6 md:px-12 lg:px-20 pb-28">
-      <div class="max-w-screen-xl mx-auto flex flex-col gap-4">
-        {galleryRows.map((row) =>
-          row.type === "solo" ? (
-            <div class="w-full overflow-hidden bg-neutral-100">
-              <img
-                src={row.img.url}
-                alt={project.title}
-                class="w-full h-auto object-cover"
-                style="max-height: 80vh; object-fit: cover;"
-              />
-            </div>
-          ) : (
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="overflow-hidden bg-neutral-100">
-                <img
-                  src={row.a.url}
-                  alt={project.title}
-                  class="w-full h-full object-cover aspect-[4/5]"
-                />
-              </div>
-              <div class="overflow-hidden bg-neutral-100">
-                <img
-                  src={row.b.url}
-                  alt={project.title}
-                  class="w-full h-full object-cover aspect-[4/5]"
-                />
-              </div>
-            </div>
-          )
+        {project.year && (
+          <span class="text-sm tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.year}</span>
         )}
       </div>
     </div>
-  )}
 
-</article>
+    <!-- Hero image -->
+    {heroImage ? (
+      <div class="px-6 md:px-12 lg:px-20">
+        <div class="max-w-screen-xl mx-auto overflow-hidden bg-neutral-100" style="height: 65vh;">
+          <img
+            src={heroImage.url}
+            alt={project.title}
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    ) : null}
+
+    <!-- Collaborators -->
+    {collaborators.length > 0 && (
+      <div class="px-6 md:px-12 lg:px-20 py-10">
+        <div class="max-w-screen-xl mx-auto flex flex-col gap-3">
+          {collaborators.map((c) => (
+            <div class="flex items-baseline gap-6">
+              <span
+                class="text-xs tracking-[0.2em] uppercase text-neutral-400 w-32 shrink-0"
+                style="font-family: var(--font-family);"
+              >
+                {c.profession}
+              </span>
+              <span
+                class="text-sm text-neutral-700"
+                style="font-family: var(--font-family);"
+              >
+                {c.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- First two gallery images: 1/3 + 2/3 -->
+    {galleryImages.length >= 1 && (
+      <div class="px-6 md:px-12 lg:px-20 py-10">
+        <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[45vh]">
+          <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto">
+            <img
+              src={galleryImages[0].url}
+              alt={project.title}
+              class="w-full h-full object-cover"
+            />
+          </div>
+          {galleryImages[1] && (
+            <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto md:col-span-2">
+              <img
+                src={galleryImages[1].url}
+                alt={project.title}
+                class="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    <!-- Alternating image sections -->
+    {sections.length > 0 && (
+      <div class="px-6 md:px-12 lg:px-20 pb-28">
+        <div class="max-w-screen-xl mx-auto flex flex-col gap-20">
+          {sections.map((section) => (
+            <div class="flex flex-col gap-10">
+
+              {section.para && (
+                <p
+                  class="text-sm text-neutral-600 leading-[2.15] max-w-xl"
+                  style="font-family: var(--font-family);"
+                >
+                  {section.para}
+                </p>
+              )}
+
+              {section.kind === "pair" && (section.img1 || section.img2) && (
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[45vh]">
+                  {section.img1 && (
+                    <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto md:col-span-2">
+                      <img src={section.img1.url} alt={project.title} class="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  {section.img2 && (
+                    <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto">
+                      <img src={section.img2.url} alt={project.title} class="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {section.kind === "solo" && section.img && (
+                <div class="grid grid-cols-1 md:grid-cols-5">
+                  <div class="md:col-start-2 md:col-span-3 overflow-hidden bg-neutral-100 aspect-[3/2]">
+                    <img src={section.img.url} alt={project.title} class="w-full h-full object-cover" />
+                  </div>
+                </div>
+              )}
+
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+  </article>
+
+) : (
+
+  <article data-preserve>
+
+    <!-- Back navigation -->
+    <div class="absolute top-0 left-0 pt-6 px-6 md:px-12 z-10">
+      <a
+        href={`/${siteSlug}/proyectos`}
+        class="inline-flex items-center gap-2.5 text-white mix-blend-difference transition-opacity hover:opacity-60"
+        style="font-family: var(--font-family);"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span class="text-xs tracking-[0.2em] uppercase">Proyectos</span>
+      </a>
+    </div>
+
+    <!-- Hero image -->
+    {heroImage ? (
+      <div class="relative w-full overflow-hidden bg-neutral-100" style="height: 85vh;">
+        <img
+          src={heroImage.url}
+          alt={project.title}
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/10"></div>
+      </div>
+    ) : (
+      <div class="w-full bg-neutral-100" style="height: 40vh;"></div>
+    )}
+
+    <!-- Project info -->
+    <div class="px-6 md:px-12 lg:px-20 mt-14">
+      <div class="max-w-screen-xl mx-auto">
+
+        <!-- Title + meta -->
+        <div class="pb-10 border-b border-neutral-200">
+          <h1
+            class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] uppercase mb-6"
+            style="font-family: var(--title-font);"
+          >
+            {project.title}
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {project.year && (
+              <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.year}</span>
+            )}
+            {project.category && (
+              <span class="text-xs tracking-[0.2em] uppercase text-neutral-500" style="font-family: var(--font-family);">{project.category}</span>
+            )}
+            {keywords.length > 0 && (
+              <div class="flex flex-wrap gap-1.5">
+                {keywords.map((kw) => (
+                  <span
+                    class="text-[0.6rem] tracking-[0.15em] uppercase px-2.5 py-1 border border-neutral-300 text-neutral-500"
+                    style="font-family: var(--font-family);"
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <!-- Description -->
+        {project.description && (
+          <div class="mt-10 mb-20">
+            <p
+              class="text-sm text-neutral-600 leading-[2.15]"
+              style="font-family: var(--font-family);"
+            >
+              {project.description}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    {galleryRows.length > 0 && (
+      <div class="px-6 md:px-12 lg:px-20 pb-28">
+        <div class="max-w-screen-xl mx-auto flex flex-col gap-4">
+          {galleryRows.map((row) =>
+            row.type === "solo" ? (
+              <div class="w-full overflow-hidden bg-neutral-100">
+                <img
+                  src={row.img.url}
+                  alt={project.title}
+                  class="w-full h-auto object-cover"
+                  style="max-height: 80vh; object-fit: cover;"
+                />
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="overflow-hidden bg-neutral-100">
+                  <img
+                    src={row.a.url}
+                    alt={project.title}
+                    class="w-full h-full object-cover aspect-[4/5]"
+                  />
+                </div>
+                <div class="overflow-hidden bg-neutral-100">
+                  <img
+                    src={row.b.url}
+                    alt={project.title}
+                    class="w-full h-full object-cover aspect-[4/5]"
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    )}
+
+  </article>
+
+)}

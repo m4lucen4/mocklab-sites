@@ -62,6 +62,19 @@ export interface BodyConfig {
   type: 1 | 2 | 3 | 4;
 }
 
+export interface ProjectListConfig {
+  layout?: "grid-4" | "grid-alternating";
+  project_order?: string[];
+  hidden_projects?: string[];
+  detail_type?: 1 | 2;
+}
+
+export interface ProjectCollaborator {
+  name: string;
+  website?: string;
+  profession: string;
+}
+
 export interface Project {
   id: string;
   user: string;
@@ -75,5 +88,6 @@ export interface Project {
     status?: string;
     processingResult?: unknown;
   }>;
+  projectCollaborators?: ProjectCollaborator[];
   created_at?: string;
 }
