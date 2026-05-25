@@ -107,6 +107,8 @@ if (galleryImages.length > 0) {
             src={heroImage.url}
             alt={project.title}
             class="w-full h-full object-cover"
+            data-lightbox
+            style="cursor:zoom-in;"
           />
         </div>
       </div>
@@ -145,6 +147,8 @@ if (galleryImages.length > 0) {
               src={galleryImages[0].url}
               alt={project.title}
               class="w-full h-full object-cover"
+              data-lightbox
+              style="cursor:zoom-in;"
             />
           </div>
           {galleryImages[1] && (
@@ -153,6 +157,8 @@ if (galleryImages.length > 0) {
                 src={galleryImages[1].url}
                 alt={project.title}
                 class="w-full h-full object-cover"
+                data-lightbox
+                style="cursor:zoom-in;"
               />
             </div>
           )}
@@ -180,12 +186,12 @@ if (galleryImages.length > 0) {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:h-[45vh]">
                   {section.img1 && (
                     <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto md:col-span-2">
-                      <img src={section.img1.url} alt={project.title} class="w-full h-full object-cover" />
+                      <img src={section.img1.url} alt={project.title} class="w-full h-full object-cover" data-lightbox style="cursor:zoom-in;" />
                     </div>
                   )}
                   {section.img2 && (
                     <div class="overflow-hidden bg-neutral-100 aspect-[4/3] md:aspect-auto">
-                      <img src={section.img2.url} alt={project.title} class="w-full h-full object-cover" />
+                      <img src={section.img2.url} alt={project.title} class="w-full h-full object-cover" data-lightbox style="cursor:zoom-in;" />
                     </div>
                   )}
                 </div>
@@ -194,7 +200,7 @@ if (galleryImages.length > 0) {
               {section.kind === "solo" && section.img && (
                 <div class="grid grid-cols-1 md:grid-cols-5">
                   <div class="md:col-start-2 md:col-span-3 overflow-hidden bg-neutral-100 aspect-[3/2]">
-                    <img src={section.img.url} alt={project.title} class="w-full h-full object-cover" />
+                    <img src={section.img.url} alt={project.title} class="w-full h-full object-cover" data-lightbox style="cursor:zoom-in;" />
                   </div>
                 </div>
               )}
@@ -233,8 +239,10 @@ if (galleryImages.length > 0) {
           src={heroImage.url}
           alt={project.title}
           class="w-full h-full object-cover"
+          data-lightbox
+          style="cursor:zoom-in;"
         />
-        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="absolute inset-0 bg-black/10 pointer-events-none"></div>
       </div>
     ) : (
       <div class="w-full bg-neutral-100" style="height: 40vh;"></div>
@@ -300,7 +308,8 @@ if (galleryImages.length > 0) {
                   src={row.img.url}
                   alt={project.title}
                   class="w-full h-auto object-cover"
-                  style="max-height: 80vh; object-fit: cover;"
+                  style="max-height: 80vh; object-fit: cover; cursor: zoom-in;"
+                  data-lightbox
                 />
               </div>
             ) : (
@@ -310,6 +319,8 @@ if (galleryImages.length > 0) {
                     src={row.a.url}
                     alt={project.title}
                     class="w-full h-full object-cover aspect-[4/5]"
+                    data-lightbox
+                    style="cursor:zoom-in;"
                   />
                 </div>
                 <div class="overflow-hidden bg-neutral-100">
@@ -317,6 +328,8 @@ if (galleryImages.length > 0) {
                     src={row.b.url}
                     alt={project.title}
                     class="w-full h-full object-cover aspect-[4/5]"
+                    data-lightbox
+                    style="cursor:zoom-in;"
                   />
                 </div>
               </div>
@@ -329,3 +342,4 @@ if (galleryImages.length > 0) {
   </article>
 
 )}
+
