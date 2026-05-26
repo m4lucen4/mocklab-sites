@@ -51,7 +51,7 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
                 <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
                   <div class="max-w-2xl mx-auto text-center">
                     <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{slide.title}</h1>
-                    <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{slide.description}</p>
+                    <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space: pre-wrap;">{slide.description}</p>
                     {slide.text_button && slide.url_button && (
                       <a
                         href={slide.url_button}
@@ -82,7 +82,7 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
                 <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
                   <div class="max-w-lg">
                     <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{slide.title}</h1>
-                    <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{slide.description}</p>
+                    <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space: pre-wrap;">{slide.description}</p>
                     {slide.text_button && slide.url_button && (
                       <a
                         href={slide.url_button}
@@ -136,7 +136,7 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
         <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
           <div class="max-w-2xl mx-auto text-center">
             <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{s0.title}</h1>
-            <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{s0.description}</p>
+            <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space: pre-wrap;">{s0.description}</p>
             {s0.text_button && s0.url_button && (
               <a
                 href={s0.url_button}
@@ -168,7 +168,7 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
         <div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">
           <div class="max-w-lg">
             <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{s0.title}</h1>
-            <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">{s0.description}</p>
+            <p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space: pre-wrap;">{s0.description}</p>
             {s0.text_button && s0.url_button && (
               <a
                 href={s0.url_button}

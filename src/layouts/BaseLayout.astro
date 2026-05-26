@@ -375,7 +375,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                     '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
                       '<div class="max-w-2xl mx-auto text-center">' +
                         '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
-                        '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">' + escapeHtml(slide.description) + '</p>' +
+                        '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space:pre-wrap;">' + escapeHtml(slide.description) + '</p>' +
                         buttonHtml +
                       '</div>' +
                     '</div>' +
@@ -391,7 +391,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                     '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
                       '<div class="max-w-lg">' +
                         '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
-                        '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6">' + escapeHtml(slide.description) + '</p>' +
+                        '<p class="text-sm md:text-base text-white/80 leading-relaxed mb-6" style="white-space:pre-wrap;">' + escapeHtml(slide.description) + '</p>' +
                         buttonHtml +
                       '</div>' +
                     '</div>' +
@@ -459,7 +459,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div class="' + innerClass + '">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
                   '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +
-                  '<p class="text-lg mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
+                  '<p class="text-lg mb-8" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(description) + '</p>' +
                   buttonsHtmlFinal +
                 '</div>' +
               '</section>';
@@ -475,7 +475,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div class="flex flex-col justify-center px-10 py-12 w-full md:w-1/2 bg-white">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
                   '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +
-                  '<p class="text-base mb-8" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(description) + '</p>' +
+                  '<p class="text-base mb-8" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(description) + '</p>' +
                   primaryBtn2 +
                 '</div>' +
               '</section>';
@@ -498,7 +498,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           }
 
           var inner = '';
-          var desc = '<div style="' + descStyle + '"><p style="margin:0;line-height:1.6;">' + escapeHtml(config.description) + '</p></div>';
+          var desc = '<div style="' + descStyle + '"><p style="margin:0;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(config.description) + '</p></div>';
           if (type === 1) {
             inner = imgCell(config.image_1) + imgCell(config.image_2) + desc;
           } else if (type === 2) {
@@ -538,10 +538,10 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               ? '<h2 class="text-4xl font-bold" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(titulo) + '</h2>'
               : '';
             var textoIzqHtml = textoIzquierda
-              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoIzquierda) + '</p>'
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(textoIzquierda) + '</p>'
               : '';
             var textoDelHtml = textoDerecha
-              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoDerecha) + '</p>'
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(textoDerecha) + '</p>'
               : '';
             return '<section data-component="content" class="px-6 md:px-16 py-16 md:py-24">' +
               '<div class="mb-12 md:mb-16">' + antetituloHtml + tituloHtml + '</div>' +
@@ -567,7 +567,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               ? '<h2 class="text-4xl font-bold mb-6" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(titulo) + '</h2>'
               : '';
             var textoDelHtml2 = textoDerecha
-              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(textoDerecha) + '</p>'
+              ? '<p class="text-base leading-relaxed mb-10" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(textoDerecha) + '</p>'
               : '';
             var imageHtml = config.image
               ? '<img src="' + escapeAttr(config.image) + '" alt="" style="display:block;width:100%;height:100%;min-height:16rem;object-fit:cover;" />'
@@ -608,7 +608,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             : '';
 
           var descripcionHtml = descripcion
-            ? '<p class="text-base leading-relaxed" style="color:var(--color-primary);opacity:0.75;">' + escapeHtml(descripcion) + '</p>'
+            ? '<p class="text-base leading-relaxed" style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;">' + escapeHtml(descripcion) + '</p>'
             : '';
 
           var inputStyle = 'width:100%;padding:0.625rem 1rem;font-size:0.875rem;border-radius:0.5rem;background:#ffffff;color:var(--color-primary);border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);outline:none;font-family:var(--font-family);';
