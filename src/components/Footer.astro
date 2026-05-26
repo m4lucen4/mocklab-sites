@@ -25,7 +25,7 @@ const currentYear = new Date().getFullYear();
         <span
           data-footer-studio
           class="text-sm font-semibold tracking-widest"
-          style="color: var(--color-primary);"
+          style="color: var(--color-tertiary);"
         >
           {site.studio_name}
         </span>
@@ -36,16 +36,16 @@ const currentYear = new Date().getFullYear();
     <span
       data-footer-year
       class="text-sm opacity-60 md:absolute md:left-1/2 md:-translate-x-1/2"
-      style="color: var(--color-primary);"
+      style="color: var(--color-tertiary);"
     >
       {currentYear}
     </span>
 
     <!-- Right: legal texts -->
     <div class="flex items-center gap-6">
-      <a href={`/${siteSlug}/aviso-legal`} data-footer-legal="aviso-legal" class="text-sm opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">Aviso Legal</a>
-      <a href={`/${siteSlug}/politica-cookies`} data-footer-legal="politica-cookies" class="text-sm opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">Política de Cookies</a>
-      <button data-cookie-settings type="button" class="text-sm opacity-60 hover:opacity-100 transition-opacity cursor-pointer bg-transparent border-none p-0" style="color: var(--color-primary);">Gestionar cookies</button>
+      <a href={`/${siteSlug}/aviso-legal`} data-footer-legal="aviso-legal" class="text-sm opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-tertiary);">Aviso Legal</a>
+      <a href={`/${siteSlug}/politica-cookies`} data-footer-legal="politica-cookies" class="text-sm opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-tertiary);">Política de Cookies</a>
+      <button data-cookie-settings type="button" class="text-sm opacity-60 hover:opacity-100 transition-opacity cursor-pointer bg-transparent border-none p-0" style="color: var(--color-tertiary);">Gestionar cookies</button>
     </div>
 
   </div>

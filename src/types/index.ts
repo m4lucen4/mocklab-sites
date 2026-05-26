@@ -16,6 +16,7 @@ export interface Site {
   linkedin_url: string | null;
   navbar_type: number;
   background_color: string | null;
+  tertiary_color?: string | null;
   published: boolean;
   created_at: string;
   updated_at: string;

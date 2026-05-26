@@ -18,7 +18,7 @@ const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.rep
 
 const titleFontFamily = site.title_font || fontFamily;
 const titleFontUrl = site.title_font ? `https://fonts.googleapis.com/css2?family=${site.title_font.replace(/ /g, "+")}:wght@400;500;600;700&display=swap` : null;
-const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --font-family: ${fontFamily}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --color-tertiary: ${site.tertiary_color || "#F5F5F5"}; --font-family: ${fontFamily}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
 ---
 
 <!doctype html>
@@ -75,7 +75,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -95,6 +95,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             // Apply CSS custom properties
             root.setProperty("--color-primary", site.primary_color);
             root.setProperty("--color-secondary", site.secondary_color);
+            root.setProperty("--color-tertiary", site.tertiary_color || "#F5F5F5");
             root.setProperty("--background-color", site.background_color || "#ffffff");
 
             if (site.font) {
@@ -222,7 +223,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           return items.map(function (s) {
             return '<a href="' + escapeAttr(s.url) + '" target="_blank" rel="noopener noreferrer"' +
-              ' class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--color-primary);">' +
+              ' class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--color-secondary);">' +
               s.svg + '</a>';
           }).join("");
         }
@@ -230,7 +231,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         function buildLogoHtml(site, siteSlug) {
           var inner = site.logo_url
             ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-8 w-auto">'
-            : '<span class="text-sm font-semibold tracking-widest" style="color:var(--color-primary);">' + escapeHtml(site.studio_name) + '</span>';
+            : '<span class="text-sm font-semibold tracking-widest" style="color:var(--color-tertiary);">' + escapeHtml(site.studio_name) + '</span>';
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
 
@@ -240,7 +241,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var cls = p.slug === currentPageSlug
               ? "text-sm tracking-wide transition-opacity font-semibold opacity-100"
               : "text-sm tracking-wide transition-opacity opacity-60 hover:opacity-100";
-            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-primary);">' + escapeHtml(p.title) + '</a></li>';
+            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(p.title) + '</a></li>';
           }).join("");
           return '<ul class="hidden md:flex items-center gap-8 flex-1">' + links + '</ul>';
         }
@@ -251,12 +252,12 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var cls = p.slug === currentPageSlug
               ? "text-sm tracking-wide font-semibold opacity-100"
               : "text-sm tracking-wide opacity-60";
-            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-primary);">' + escapeHtml(p.title) + '</a>';
+            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(p.title) + '</a>';
           }).join("");
 
           var socials = buildSocialsHtml(site);
           var socialsRow = socials
-            ? '<div class="flex items-center gap-4 pt-4" style="border-top:1px solid var(--color-primary);opacity:0.4;">' + socials + '</div>'
+            ? '<div class="flex items-center gap-4 pt-4" style="border-top:1px solid var(--color-secondary);opacity:0.4;">' + socials + '</div>'
             : "";
 
           return '<div id="mobile-menu" class="hidden absolute top-16 left-0 right-0 z-40 px-6 py-6 flex-col gap-4 md:hidden"' +
@@ -265,7 +266,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         }
 
         function buildHamburgerHtml(site) {
-          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-primary);">' + SVG_HAMBURGER + '</button>';
+          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-secondary);">' + SVG_HAMBURGER + '</button>';
         }
 
         function renderNavigation(site, navPages, siteSlug, currentPageSlug) {

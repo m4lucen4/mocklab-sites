@@ -39,7 +39,7 @@ const socials = [
                 <a
                   href={href}
                   class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60 hover:opacity-100"]}
-                  style="color: var(--color-primary);"
+                  style="color: var(--color-tertiary);"
                 >
                   {page.title}
                 </a>
@@ -53,7 +53,7 @@ const socials = [
           {site.logo_url ? (
             <img src={site.logo_url} alt={site.studio_name} class="h-8 w-auto" />
           ) : (
-            <span class="text-sm font-semibold tracking-widest" style="color: var(--color-primary);">
+            <span class="text-sm font-semibold tracking-widest" style="color: var(--color-tertiary);">
               {site.studio_name}
             </span>
           )}
@@ -63,7 +63,7 @@ const socials = [
         <div class="hidden md:flex items-center gap-4 flex-1 justify-end">
           {socials.map((s) => (
             <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">
+               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-secondary);">
               {s.key === "instagram" && (
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -88,7 +88,7 @@ const socials = [
         </div>
 
         <!-- Mobile hamburger -->
-        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-primary);">
+        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-secondary);">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
@@ -102,7 +102,7 @@ const socials = [
           {site.logo_url ? (
             <img src={site.logo_url} alt={site.studio_name} class="h-8 w-auto" />
           ) : (
-            <span class="text-sm font-semibold tracking-widest" style="color: var(--color-primary);">
+            <span class="text-sm font-semibold tracking-widest" style="color: var(--color-tertiary);">
               {site.studio_name}
             </span>
           )}
@@ -118,7 +118,7 @@ const socials = [
                 <a
                   href={href}
                   class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60 hover:opacity-100"]}
-                  style="color: var(--color-primary);"
+                  style="color: var(--color-tertiary);"
                 >
                   {page.title}
                 </a>
@@ -131,7 +131,7 @@ const socials = [
         <div class="hidden md:flex items-center gap-4 ml-auto">
           {socials.map((s) => (
             <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-primary);">
+               class="opacity-60 hover:opacity-100 transition-opacity" style="color: var(--color-secondary);">
               {s.key === "instagram" && (
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
@@ -156,7 +156,7 @@ const socials = [
         </div>
 
         <!-- Mobile hamburger -->
-        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-primary);">
+        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Abrir menú" style="color: var(--color-secondary);">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
@@ -178,17 +178,17 @@ const socials = [
         <a
           href={href}
           class:list={["text-sm tracking-wide transition-opacity", isActive ? "font-semibold opacity-100" : "opacity-60"]}
-          style="color: var(--color-primary);"
+          style="color: var(--color-tertiary);"
         >
           {page.title}
         </a>
       );
     })}
     {socials.length > 0 && (
-      <div class="flex items-center gap-4 pt-2 border-t" style="border-color: var(--color-primary); opacity: 0.2;">
+      <div class="flex items-center gap-4 pt-2 border-t" style="border-color: var(--color-secondary); opacity: 0.2;">
         {socials.map((s) => (
           <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-             class="opacity-60" style="color: var(--color-primary);">
+             class="opacity-60" style="color: var(--color-secondary);">
             {s.key === "instagram" && (
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
