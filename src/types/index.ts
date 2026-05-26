@@ -41,6 +41,8 @@ export interface HeaderSlide {
   type: 1 | 2;
   text_button: string;
   url_button: string;
+  vimeo_url?: string;
+  background_type?: "image" | "vimeo";
 }
 
 export interface SiteComponent {
