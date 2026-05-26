@@ -14,17 +14,13 @@ function truncate(text: string, maxWords = 20): string {
   return words.length <= maxWords ? text : words.slice(0, maxWords).join(" ") + "…";
 }
 
-const allKeywords = Array.from(
+const allCategories = Array.from(
   new Set(
     projects
-      .map((p) => p.keywords)
-      .filter(Boolean)
-      .flatMap((k) => k.split(",").map((kw) => kw.trim()))
-      .filter(Boolean)
+      .map((p) => p.category)
+      .filter(Boolean) as string[]
   )
 );
-
-
 ---
 
 <section data-preserve class="pt-24 pb-20 px-6 md:px-16">
@@ -33,43 +29,142 @@ const allKeywords = Array.from(
     <div class="flex items-start justify-between mb-10 gap-6">
       <h1 class="text-4xl font-bold text-neutral-900 tracking-wide shrink-0" style="font-family: var(--title-font);">Proyectos</h1>
 
-      {allKeywords.length > 0 && (
-        <div class="flex flex-col items-end gap-3">
-          <!-- Select -->
-          <div class="relative">
-            <select
-              id="keyword-select"
-              class="appearance-none pl-3 pr-8 py-1.5 text-xs font-semibold border border-neutral-900 bg-white text-neutral-900 cursor-pointer focus:outline-none"
-              style="font-family: var(--font-family);"
-            >
-              <option value="">Filtrar por categoría</option>
-              {allKeywords.map((kw) => (
-                <option value={kw}>{kw}</option>
-              ))}
-            </select>
-            <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-900">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </span>
+      <div class="flex items-start gap-4">
+        <!-- View toggle -->
+        <div class="flex items-center gap-1 pt-1.5">
+          <button id="btn-view-grid" class="p-1.5 text-neutral-900 transition-colors" aria-label="Vista cuadrícula" title="Vista cuadrícula">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+          <button id="btn-view-list" class="p-1.5 text-neutral-400 transition-colors" aria-label="Vista lista" title="Vista lista">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {allCategories.length > 0 && (
+          <div class="flex flex-col items-end gap-3">
+            <div class="relative">
+              <select
+                id="keyword-select"
+                class="appearance-none pl-3 pr-8 py-1.5 text-xs font-semibold border border-neutral-900 bg-white text-neutral-900 cursor-pointer focus:outline-none"
+                style="font-family: var(--font-family);"
+              >
+                <option value="">Filtrar por categoría</option>
+                {allCategories.map((cat) => (
+                  <option value={cat}>{cat}</option>
+                ))}
+              </select>
+              <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </span>
+            </div>
+            <div id="active-pills" class="flex flex-wrap gap-2 justify-end"></div>
           </div>
-          <!-- Active pills -->
-          <div id="active-pills" class="flex flex-wrap gap-2 justify-end"></div>
+        )}
+      </div>
+    </div>
+
+    <!-- Grid view (dashboard-configured) -->
+    <div id="view-grid">
+      {layout === "grid-4" && (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {projects.map((project) => {
+            const coverImage = project.image_data?.find((img) => img.url)?.url;
+            return (
+              <a
+                href={`/${siteSlug}/proyectos/${project.id}`}
+                class="project-card group block"
+                data-category={project.category ?? ""}
+              >
+                <div class="aspect-3/4 overflow-hidden bg-neutral-100 mb-3">
+                  {coverImage ? (
+                    <img
+                      src={coverImage}
+                      alt={project.title}
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div class="w-full h-full bg-[#e8e3d8]" />
+                  )}
+                </div>
+                <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
+                {project.description && (
+                  <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">{truncate(project.description)}</p>
+                )}
+                {(project.category || project.year) && (
+                  <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
+                    {[project.category, project.year].filter(Boolean).join(" | ")}
+                  </p>
+                )}
+              </a>
+            );
+          })}
+        </div>
+      )}
+
+      {layout === "grid-alternating" && (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          {projects.map((project, index) => {
+            const coverImage = project.image_data?.find((img) => img.url)?.url;
+            const groupIndex = Math.floor(index / 3);
+            const posInGroup = index % 3;
+            const isEvenGroup = groupIndex % 2 === 0;
+            const isLarge = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
+            const span = isLarge ? "md:col-span-2 lg:col-span-6" : "md:col-span-1 lg:col-span-3";
+            return (
+              <a
+                href={`/${siteSlug}/proyectos/${project.id}`}
+                class:list={["project-card group block", span]}
+                data-category={project.category ?? ""}
+              >
+                <div class:list={[
+                  isLarge ? "aspect-3/2" : "aspect-[5/7]",
+                  "overflow-hidden bg-neutral-100 mb-4"
+                ]}>
+                  {coverImage ? (
+                    <img
+                      src={coverImage}
+                      alt={project.title}
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div class="w-full h-full bg-[#e8e3d8]" />
+                  )}
+                </div>
+                <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
+                {project.description && (
+                  <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">
+                    {truncate(project.description)}
+                  </p>
+                )}
+                {(project.category || project.year) && (
+                  <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
+                    {[project.category, project.year].filter(Boolean).join(" | ")}
+                  </p>
+                )}
+              </a>
+            );
+          })}
         </div>
       )}
     </div>
 
-    <!-- Grid-4 layout -->
-    {layout === "grid-4" && (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="projects-grid">
+    <!-- List view (always available) -->
+    <div id="view-list" class="hidden">
+      <div class="divide-y divide-neutral-200">
         {projects.map((project) => {
           const coverImage = project.image_data?.find((img) => img.url)?.url;
-          const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
           return (
             <a
               href={`/${siteSlug}/proyectos/${project.id}`}
-              class="project-card group block"
-              data-keywords={keywords.join(",")}
+              class="project-card group flex items-center gap-6 py-4 -mx-3 px-3 hover:bg-neutral-50 transition-colors"
+              data-category={project.category ?? ""}
             >
-              <div class="aspect-3/4 overflow-hidden bg-neutral-100 mb-3">
+              <div class="w-20 h-16 shrink-0 overflow-hidden bg-neutral-100">
                 {coverImage ? (
                   <img
                     src={coverImage}
@@ -80,12 +175,14 @@ const allKeywords = Array.from(
                   <div class="w-full h-full bg-[#e8e3d8]" />
                 )}
               </div>
-              <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
-              {project.description && (
-                <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">{truncate(project.description)}</p>
-              )}
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-neutral-900" style="font-family: var(--title-font);">{project.title}</p>
+                {project.description && (
+                  <p class="text-xs text-neutral-500 mt-0.5 truncate" style="font-family: var(--font-family);">{truncate(project.description, 15)}</p>
+                )}
+              </div>
               {(project.category || project.year) && (
-                <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
+                <p class="text-[0.65rem] font-bold text-neutral-500 shrink-0" style="font-family: var(--font-family);">
                   {[project.category, project.year].filter(Boolean).join(" | ")}
                 </p>
               )}
@@ -93,55 +190,8 @@ const allKeywords = Array.from(
           );
         })}
       </div>
-    )}
+    </div>
 
-    <!-- Grid-alternating layout -->
-    {layout === "grid-alternating" && (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6" id="projects-grid">
-        {projects.map((project, index) => {
-          const coverImage = project.image_data?.find((img) => img.url)?.url;
-          const groupIndex = Math.floor(index / 3);
-          const posInGroup = index % 3;
-          const isEvenGroup = groupIndex % 2 === 0;
-          const isLarge = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
-          const span = isLarge ? "md:col-span-2 lg:col-span-6" : "md:col-span-1 lg:col-span-3";
-          const keywords = project.keywords?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
-          return (
-            <a
-              href={`/${siteSlug}/proyectos/${project.id}`}
-              class:list={["project-card group block", span]}
-              data-keywords={keywords.join(",")}
-            >
-              <div class:list={[
-                isLarge ? "aspect-3/2" : "aspect-[5/7]",
-                "overflow-hidden bg-neutral-100 mb-4"
-              ]}>
-                {coverImage ? (
-                  <img
-                    src={coverImage}
-                    alt={project.title}
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div class="w-full h-full bg-[#e8e3d8]" />
-                )}
-              </div>
-              <p class="text-sm font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
-              {project.description && (
-                <p class="text-xs text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">
-                  {truncate(project.description)}
-                </p>
-              )}
-              {(project.category || project.year) && (
-                <p class="text-[0.65rem] font-bold text-neutral-900" style="font-family: var(--font-family);">
-                  {[project.category, project.year].filter(Boolean).join(" | ")}
-                </p>
-              )}
-            </a>
-          );
-        })}
-      </div>
-    )}
   </div>
 </section>
 
@@ -154,34 +204,72 @@ const allKeywords = Array.from(
 <script>
   const select = document.getElementById("keyword-select") as HTMLSelectElement | null;
   const pillsContainer = document.getElementById("active-pills");
-  const projectCards = document.querySelectorAll<HTMLElement>(".project-card");
+  const viewGrid = document.getElementById("view-grid")!;
+  const viewList = document.getElementById("view-list")!;
+  const btnGrid = document.getElementById("btn-view-grid")!;
+  const btnList = document.getElementById("btn-view-list")!;
 
   const activeFilters = new Set<string>();
+  let currentView: "grid" | "list" = "grid";
 
+  // --- View toggle ---
+  function setView(view: "grid" | "list") {
+    currentView = view;
+    if (view === "grid") {
+      viewGrid.classList.remove("hidden");
+      viewList.classList.add("hidden");
+      btnGrid.classList.remove("text-neutral-400");
+      btnGrid.classList.add("text-neutral-900");
+      btnList.classList.remove("text-neutral-900");
+      btnList.classList.add("text-neutral-400");
+    } else {
+      viewGrid.classList.add("hidden");
+      viewList.classList.remove("hidden");
+      btnList.classList.remove("text-neutral-400");
+      btnList.classList.add("text-neutral-900");
+      btnGrid.classList.remove("text-neutral-900");
+      btnGrid.classList.add("text-neutral-400");
+    }
+  }
+
+  btnGrid.addEventListener("click", () => setView("grid"));
+  btnList.addEventListener("click", () => setView("list"));
+
+  // --- Filter ---
   function applyFilters() {
-    projectCards.forEach((card) => {
+    const container = currentView === "grid" ? viewGrid : viewList;
+    container.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
       if (activeFilters.size === 0) {
         card.classList.remove("hidden-by-filter");
         return;
       }
-      const cardKeywords = (card.dataset.keywords ?? "").split(",").map((k) => k.trim());
-      const matches = [...activeFilters].some((f) => cardKeywords.includes(f));
-      card.classList.toggle("hidden-by-filter", !matches);
+      const cardCategory = card.dataset.category ?? "";
+      card.classList.toggle("hidden-by-filter", !activeFilters.has(cardCategory));
+    });
+    // Keep the other view in sync too
+    const other = currentView === "grid" ? viewList : viewGrid;
+    other.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
+      if (activeFilters.size === 0) {
+        card.classList.remove("hidden-by-filter");
+        return;
+      }
+      const cardCategory = card.dataset.category ?? "";
+      card.classList.toggle("hidden-by-filter", !activeFilters.has(cardCategory));
     });
   }
 
-  function addPill(keyword: string) {
-    if (activeFilters.has(keyword)) return;
-    activeFilters.add(keyword);
+  function addPill(category: string) {
+    if (activeFilters.has(category)) return;
+    activeFilters.add(category);
 
     const pill = document.createElement("span");
     pill.className = "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-neutral-900 text-white";
     pill.style.fontFamily = "var(--font-family)";
-    pill.dataset.keyword = keyword;
-    pill.innerHTML = `${keyword}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Eliminar filtro ${keyword}">✕</button>`;
+    pill.dataset.category = category;
+    pill.innerHTML = `${category}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Eliminar filtro ${category}">✕</button>`;
 
     pill.querySelector("button")!.addEventListener("click", () => {
-      activeFilters.delete(keyword);
+      activeFilters.delete(category);
       pill.remove();
       applyFilters();
     });
