@@ -39,6 +39,9 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     {titleFontUrl && <link href={titleFontUrl} rel="stylesheet" />}
 
     <style>
+      html {
+        overflow-x: hidden;
+      }
       body {
         font-family: var(--font-family), sans-serif;
         margin: 0 auto;
