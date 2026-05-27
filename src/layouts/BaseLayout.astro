@@ -240,7 +240,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           return items.map(function (s) {
             return '<a href="' + escapeAttr(s.url) + '" target="_blank" rel="noopener noreferrer"' +
-              ' class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--color-secondary);">' +
+              ' class="opacity-60 hover:opacity-100 transition-opacity" style="color:var(--color-tertiary);">' +
               s.svg + '</a>';
           }).join("");
         }
@@ -283,7 +283,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         }
 
         function buildHamburgerHtml(site) {
-          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-secondary);">' + SVG_HAMBURGER + '</button>';
+          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-tertiary);">' + SVG_HAMBURGER + '</button>';
         }
 
         function renderNavigation(site, navPages, siteSlug, currentPageSlug) {
@@ -626,8 +626,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var isStretch = hAlign === 'stretch';
           var hClass = hMap[hAlign] || 'justify-between';
 
-          var sectionPadding = isStretch ? '2rem 8rem' : '2rem 2.5rem';
-          var colStyle2 = isStretch ? 'flex:1;min-width:0;' : 'width:40%;flex:none;';
+          var sectionClass = isStretch ? 'py-8 px-0 md:px-32' : 'py-8 px-0 md:px-10';
           var gapClass = isStretch ? 'gap-16' : 'gap-8';
 
           var p1 = preloadedProjects[0] || null;
@@ -636,7 +635,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var imgStyle = 'width:100%;height:auto;display:block;';
           var placeholderStyle = 'width:100%;aspect-ratio:4/3;background-color:#e5e7eb;display:block;';
 
-          function cardHtml(p, vClass, colStyle) {
+          function cardHtml(p, vClass, colClass) {
             if (!p) return '';
             var href = '/' + escapeAttr(slug) + '/proyectos/' + escapeAttr(String(p.id));
             var imgHtml = p.image_url
@@ -646,9 +645,9 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var metaHtml = meta
               ? '<p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--color-primary);opacity:0.65;">' + escapeHtml(meta) + '</p>'
               : '';
-            return '<a href="' + href + '" class="flex flex-col ' + vClass + '" style="' + colStyle + 'text-decoration:none;cursor:pointer;color:inherit;">' +
+            return '<a href="' + href + '" class="flex flex-col ' + vClass + ' ' + colClass + '" style="text-decoration:none;cursor:pointer;color:inherit;">' +
               '<div style="overflow:hidden;">' + imgHtml + '</div>' +
-              '<div style="margin-top:0.75rem;">' +
+              '<div class="px-4 md:px-0" style="margin-top:0.75rem;">' +
                 '<p style="margin:0;font-size:1rem;font-weight:600;color:var(--color-primary);">' + escapeHtml(p.title || '') + '</p>' +
                 metaHtml +
               '</div>' +
@@ -657,17 +656,18 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           if (columns === 1) {
             if (!p1) return '';
-            return '<section data-component="project_columns" style="padding:2rem 2.5rem;">' +
+            return '<section data-component="project_columns" class="py-8 px-0 md:px-10">' +
               '<div style="max-width:42rem;margin:0 auto;">' +
                 cardHtml(p1, v1Class, '') +
               '</div>' +
             '</section>';
           } else {
             if (!p1 && !p2) return '';
-            return '<section data-component="project_columns" style="padding:' + sectionPadding + ';">' +
-              '<div class="flex ' + gapClass + (isStretch ? '' : ' ' + hClass) + '">' +
-                (p1 ? cardHtml(p1, v1Class, colStyle2) : '') +
-                (p2 ? cardHtml(p2, v2Class, colStyle2) : '') +
+            var colClass = isStretch ? 'w-full md:flex-1' : 'w-full md:w-[40%] md:flex-none';
+            return '<section data-component="project_columns" class="' + sectionClass + '">' +
+              '<div class="flex flex-col md:flex-row ' + gapClass + (isStretch ? '' : ' ' + hClass) + '">' +
+                (p1 ? cardHtml(p1, v1Class, colClass) : '') +
+                (p2 ? cardHtml(p2, v2Class, colClass) : '') +
               '</div>' +
             '</section>';
           }

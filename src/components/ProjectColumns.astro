@@ -28,8 +28,7 @@ const v2Class = vMap[vertical_align_2] ?? "justify-start";
 const isStretch = horizontal_align === "stretch";
 const hClass = hMap[horizontal_align] ?? "justify-between";
 
-const sectionPadding = isStretch ? "2rem 8rem" : "2rem 2.5rem";
-const colStyle = isStretch ? "flex: 1; min-width: 0;" : "width: 40%; flex: none;";
+const sectionClass = isStretch ? "py-8 px-0 md:px-32" : "py-8 px-0 md:px-10";
 const gapClass = isStretch ? "gap-16" : "gap-8";
 
 const imgStyle = "width: 100%; height: auto; display: block;";
@@ -42,7 +41,7 @@ const pcProjects = JSON.stringify([
 ---
 
 {columns === 1 && p1 && (
-  <section data-component="project_columns" data-projects={pcProjects} style="padding: 2rem 2.5rem;">
+  <section data-component="project_columns" data-projects={pcProjects} class="py-8 px-0 md:px-10">
     <div style="max-width: 42rem; margin: 0 auto;">
       <a href={`/${siteSlug}/proyectos/${p1.id}`} class={`group flex flex-col ${v1Class}`} style="text-decoration: none; color: inherit;">
         <div style="overflow: hidden;">
@@ -65,17 +64,17 @@ const pcProjects = JSON.stringify([
 )}
 
 {columns === 2 && (p1 || p2) && (
-  <section data-component="project_columns" data-projects={pcProjects} style={`padding: ${sectionPadding};`}>
-    <div class={`flex ${gapClass} ${isStretch ? "" : hClass}`}>
+  <section data-component="project_columns" data-projects={pcProjects} class={sectionClass}>
+    <div class={`flex flex-col md:flex-row ${gapClass} ${isStretch ? "" : hClass}`}>
       {p1 && (
-        <a href={`/${siteSlug}/proyectos/${p1.id}`} class={`group flex flex-col ${v1Class}`} style={`${colStyle} text-decoration: none; color: inherit;`}>
+        <a href={`/${siteSlug}/proyectos/${p1.id}`} class={`group flex flex-col ${v1Class} w-full ${isStretch ? "md:flex-1" : "md:w-[40%] md:flex-none"}`} style="text-decoration: none; color: inherit;">
           <div style="overflow: hidden;">
             {p1.image_data?.[0]?.url
               ? <img src={p1.image_data[0].url} alt={p1.title} class="transition-transform duration-500 group-hover:scale-105" style={imgStyle} />
               : <div style={placeholderStyle} />
             }
           </div>
-          <div style="margin-top: 0.75rem;">
+          <div class="px-4 md:px-0" style="margin-top: 0.75rem;">
             <p style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-primary);">{p1.title}</p>
             {(p1.category || p1.year) && (
               <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--color-primary); opacity: 0.65;">
@@ -86,14 +85,14 @@ const pcProjects = JSON.stringify([
         </a>
       )}
       {p2 && (
-        <a href={`/${siteSlug}/proyectos/${p2.id}`} class={`group flex flex-col ${v2Class}`} style={`${colStyle} text-decoration: none; color: inherit;`}>
+        <a href={`/${siteSlug}/proyectos/${p2.id}`} class={`group flex flex-col ${v2Class} w-full ${isStretch ? "md:flex-1" : "md:w-[40%] md:flex-none"}`} style="text-decoration: none; color: inherit;">
           <div style="overflow: hidden;">
             {p2.image_data?.[0]?.url
               ? <img src={p2.image_data[0].url} alt={p2.title} class="transition-transform duration-500 group-hover:scale-105" style={imgStyle} />
               : <div style={placeholderStyle} />
             }
           </div>
-          <div style="margin-top: 0.75rem;">
+          <div class="px-4 md:px-0" style="margin-top: 0.75rem;">
             <p style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-primary);">{p2.title}</p>
             {(p2.category || p2.year) && (
               <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--color-primary); opacity: 0.65;">
