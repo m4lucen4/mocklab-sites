@@ -5,9 +5,10 @@ interface Props {
   projects: Project[];
   siteSlug: string;
   layout?: "grid-4" | "grid-alternating";
+  fullWidth?: boolean;
 }
 
-const { projects, siteSlug, layout = "grid-4" } = Astro.props;
+const { projects, siteSlug, layout = "grid-4", fullWidth = false } = Astro.props;
 
 function truncate(text: string, maxWords = 20): string {
   const words = text.trim().split(/\s+/);
@@ -24,7 +25,7 @@ const allCategories = Array.from(
 ---
 
 <section data-preserve class="pt-24 pb-20 px-6 md:px-16">
-  <div class="max-w-7xl mx-auto">
+  <div class={fullWidth ? "w-full" : "max-w-7xl mx-auto"}>
 
     <div class="flex items-start justify-between mb-10 gap-6">
       <h1 class="text-4xl font-bold text-neutral-900 tracking-wide shrink-0" style="font-family: var(--title-font);">Proyectos</h1>

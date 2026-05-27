@@ -18,7 +18,8 @@ const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.rep
 
 const titleFontFamily = site.title_font || fontFamily;
 const titleFontUrl = site.title_font ? `https://fonts.googleapis.com/css2?family=${site.title_font.replace(/ /g, "+")}:wght@400;500;600;700&display=swap` : null;
-const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --color-tertiary: ${site.tertiary_color || "#F5F5F5"}; --font-family: ${fontFamily}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"};`;
+const siteMaxWidth = site.full_width ? "none" : "1400px";
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --color-tertiary: ${site.tertiary_color || "#F5F5F5"}; --font-family: ${fontFamily}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"}; --site-max-width: ${siteMaxWidth};`;
 ---
 
 <!doctype html>
@@ -45,7 +46,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
       body {
         font-family: var(--font-family), sans-serif;
         margin: 0 auto;
-        max-width: 1400px;
+        max-width: var(--site-max-width, 1400px);
         background-color: var(--background-color, #ffffff);
         opacity: 0;
         transition: opacity 0.15s ease-in;
@@ -75,7 +76,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -97,6 +98,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             root.setProperty("--color-secondary", site.secondary_color);
             root.setProperty("--color-tertiary", site.tertiary_color || "#F5F5F5");
             root.setProperty("--background-color", site.background_color || "#ffffff");
+            root.setProperty("--site-max-width", site.full_width ? "none" : "1400px");
 
             if (site.font) {
               var fontName = site.font.replace(/ /g, "+");
@@ -172,9 +174,20 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                       ? Array.from(pageContent.querySelectorAll('[data-preserve]'))
                       : [];
 
+                    // Collect project data from SSR-rendered project_columns before innerHTML is replaced
+                    var pcDataByIndex = [];
+                    if (pageContent) {
+                      var existingPCEls = pageContent.querySelectorAll('[data-component="project_columns"]');
+                      existingPCEls.forEach(function (el) {
+                        try { pcDataByIndex.push(JSON.parse(el.getAttribute('data-projects') || '[]')); }
+                        catch (e) { pcDataByIndex.push([]); }
+                      });
+                    }
+
                     var pageHtml = '';
                     if (components) {
                       var compIndex = 0;
+                      var pcIndex = 0;
                       components.forEach(function (comp) {
                         var compHtml = '';
                         if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config);
@@ -182,6 +195,10 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                         if (comp.type === 'body') compHtml = buildBodyHtml(comp.config);
                         if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
                         if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
+                        if (comp.type === 'project_columns') {
+                          compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
+                          pcIndex++;
+                        }
                         if (compHtml) {
                           if (compIndex > 0) pageHtml += '<div style="height:2rem;"></div>';
                           pageHtml += compHtml;
@@ -284,7 +301,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           if (navType === 1) {
             // Menu | Logo | Socials
             innerHtml =
-              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:1400px;margin:0 auto;">' +
+              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:var(--site-max-width,1400px);margin:0 auto;">' +
                 menuHtml +
                 '<div class="flex items-center justify-center flex-1 md:absolute md:left-1/2 md:-translate-x-1/2">' + logoHtml + '</div>' +
                 (socialsHtml
@@ -295,7 +312,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           } else {
             // Logo | Menu | Socials
             innerHtml =
-              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:1400px;margin:0 auto;">' +
+              '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:var(--site-max-width,1400px);margin:0 auto;">' +
                 '<div class="shrink-0 mr-12">' + logoHtml + '</div>' +
                 menuHtml +
                 (socialsHtml
@@ -588,6 +605,69 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                   datoBlock(config.dato3, config.leyenda3, 'text-4xl') +
                   datoBlock(config.dato4, config.leyenda4, 'text-4xl') +
                 '</div>' +
+              '</div>' +
+            '</section>';
+          }
+        }
+
+        function buildProjectColumnsHtml(config, preloadedProjects) {
+          if (!config) return '';
+
+          var columns = config.columns || 1;
+          var vAlign1 = config.vertical_align_1 || 'top';
+          var vAlign2 = config.vertical_align_2 || 'top';
+          var hAlign = config.horizontal_align || 'between';
+
+          var vMap = { top: 'justify-start', center: 'justify-center', bottom: 'justify-end' };
+          var hMap = { start: 'justify-start', end: 'justify-end', between: 'justify-between' };
+
+          var v1Class = vMap[vAlign1] || 'justify-start';
+          var v2Class = vMap[vAlign2] || 'justify-start';
+          var isStretch = hAlign === 'stretch';
+          var hClass = hMap[hAlign] || 'justify-between';
+
+          var sectionPadding = isStretch ? '2rem 8rem' : '2rem 2.5rem';
+          var colStyle2 = isStretch ? 'flex:1;min-width:0;' : 'width:40%;flex:none;';
+          var gapClass = isStretch ? 'gap-16' : 'gap-8';
+
+          var p1 = preloadedProjects[0] || null;
+          var p2 = preloadedProjects[1] || null;
+
+          var imgStyle = 'width:100%;height:auto;display:block;';
+          var placeholderStyle = 'width:100%;aspect-ratio:4/3;background-color:#e5e7eb;display:block;';
+
+          function cardHtml(p, vClass, colStyle) {
+            if (!p) return '';
+            var href = '/' + escapeAttr(slug) + '/proyectos/' + escapeAttr(String(p.id));
+            var imgHtml = p.image_url
+              ? '<img src="' + escapeAttr(p.image_url) + '" alt="' + escapeAttr(p.title || '') + '" style="' + imgStyle + 'transition:transform 0.5s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'" />'
+              : '<div style="' + placeholderStyle + '"></div>';
+            var meta = [p.category, p.year].filter(Boolean).join(' · ');
+            var metaHtml = meta
+              ? '<p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--color-primary);opacity:0.65;">' + escapeHtml(meta) + '</p>'
+              : '';
+            return '<a href="' + href + '" class="flex flex-col ' + vClass + '" style="' + colStyle + 'text-decoration:none;cursor:pointer;color:inherit;">' +
+              '<div style="overflow:hidden;">' + imgHtml + '</div>' +
+              '<div style="margin-top:0.75rem;">' +
+                '<p style="margin:0;font-size:1rem;font-weight:600;color:var(--color-primary);">' + escapeHtml(p.title || '') + '</p>' +
+                metaHtml +
+              '</div>' +
+            '</a>';
+          }
+
+          if (columns === 1) {
+            if (!p1) return '';
+            return '<section data-component="project_columns" style="padding:2rem 2.5rem;">' +
+              '<div style="max-width:42rem;margin:0 auto;">' +
+                cardHtml(p1, v1Class, '') +
+              '</div>' +
+            '</section>';
+          } else {
+            if (!p1 && !p2) return '';
+            return '<section data-component="project_columns" style="padding:' + sectionPadding + ';">' +
+              '<div class="flex ' + gapClass + (isStretch ? '' : ' ' + hClass) + '">' +
+                (p1 ? cardHtml(p1, v1Class, colStyle2) : '') +
+                (p2 ? cardHtml(p2, v2Class, colStyle2) : '') +
               '</div>' +
             '</section>';
           }

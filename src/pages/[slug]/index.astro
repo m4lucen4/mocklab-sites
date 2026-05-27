@@ -1,11 +1,12 @@
 ---
-import { getSiteBySlug, getSitePages, getPageComponents } from "../../lib/supabase";
-import type { SiteComponent, BodyConfig } from "../../types";
+import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
+import type { SiteComponent, BodyConfig, ProjectColumnsConfig, Project } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
+import ProjectColumns from "../../components/ProjectColumns.astro";
 
 const { slug } = Astro.params;
 
@@ -22,6 +23,11 @@ let components: SiteComponent[] = [];
 if (homePage) {
   components = await getPageComponents(homePage.id);
 }
+
+let allProjects: Project[] = [];
+if (components.some((c) => c.type === "project_columns")) {
+  allProjects = await getUserProjects(site.user_id);
+}
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug="home">
@@ -37,6 +43,9 @@ if (homePage) {
     }
     if (component.type === "content") {
       return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
+    }
+    if (component.type === "project_columns") {
+      return <ProjectColumns config={component.config as ProjectColumnsConfig} projects={allProjects} siteSlug={site.slug} />;
     }
     return null;
   })}

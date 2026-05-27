@@ -17,6 +17,7 @@ export interface Site {
   navbar_type: number;
   background_color: string | null;
   tertiary_color?: string | null;
+  full_width?: boolean;
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -70,6 +71,15 @@ export interface ProjectListConfig {
   project_order?: string[];
   hidden_projects?: string[];
   detail_type?: 1 | 2;
+}
+
+export interface ProjectColumnsConfig {
+  columns: 1 | 2;
+  project_1?: string;
+  project_2?: string;
+  vertical_align_1?: "top" | "center" | "bottom";
+  vertical_align_2?: "top" | "center" | "bottom";
+  horizontal_align?: "start" | "end" | "between" | "stretch";
 }
 
 export interface ProjectCollaborator {
