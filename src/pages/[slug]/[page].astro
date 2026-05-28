@@ -1,6 +1,6 @@
 ---
 import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig } from "../../types";
+import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig, RichTextConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -9,6 +9,7 @@ import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
 import LegalPage from "../../components/LegalPage.astro";
 import ProjectColumns from "../../components/ProjectColumns.astro";
+import RichText from "../../components/RichText.astro";
 
 const { slug, page: pageSlug } = Astro.params;
 
@@ -80,6 +81,9 @@ if (projectOrder.length > 0) {
         }
         if (component.type === "project_columns") {
           return <ProjectColumns config={component.config as ProjectColumnsConfig} projects={projects} siteSlug={site.slug} />;
+        }
+        if (component.type === "rich_text") {
+          return <RichText config={component.config as RichTextConfig} />;
         }
         return null;
       })}

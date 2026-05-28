@@ -73,6 +73,11 @@ export interface ProjectListConfig {
   detail_type?: 1 | 2;
 }
 
+export interface RichTextConfig {
+  content: string;
+  alignment: "left" | "right";
+}
+
 export interface ProjectColumnsConfig {
   columns: 1 | 2;
   project_1?: string;

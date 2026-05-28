@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+.html-content strong { font-weight: 700; }
+.html-content em { font-style: italic; }
+.html-content p { margin: 0; }
+.html-content p + p { margin-top: 0.10em; }
+
 .body-grid {
   display: grid;
   gap: 8px;

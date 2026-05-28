@@ -1,0 +1,21 @@
+---
+import type { RichTextConfig } from "../types";
+
+interface Props {
+  config: RichTextConfig;
+}
+
+const { config } = Astro.props;
+---
+
+<section
+  data-component="rich_text"
+  class="px-6 md:px-16 py-8"
+  style={`color: var(--color-primary);`}
+>
+  <div
+    class="html-content text-base leading-relaxed w-full md:w-1/2"
+    style={`text-align: ${config.alignment}; ${config.alignment === 'right' ? 'margin-left: auto;' : ''}`}
+    set:html={config.content}
+  />
+</section>

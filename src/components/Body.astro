@@ -17,14 +17,14 @@ const descStyle = "align-self: end; padding: 2rem 2.5rem; color: var(--color-pri
   <section data-component="body" class="body-grid body-grid-1">
     {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
     {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
-    <div style={descStyle}><p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">{description}</p></div>
+    <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 2 && (
   <section data-component="body" class="body-grid body-grid-2">
     {image_1 && <div class="img-wrapper-wide"><img src={image_1} alt="" style={imgStyle} /></div>}
-    <div style={descStyle}><p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">{description}</p></div>
+    <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
@@ -33,7 +33,7 @@ const descStyle = "align-self: end; padding: 2rem 2.5rem; color: var(--color-pri
     {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
     {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
     {image_3 && <div class="img-wrapper"><img src={image_3} alt="" style={imgStyle} /></div>}
-    <div style={descStyle}><p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">{description}</p></div>
+    <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
