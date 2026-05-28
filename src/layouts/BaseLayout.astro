@@ -23,7 +23,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 ---
 
 <!doctype html>
-<html lang="es" data-slug={site.slug} data-page-slug={currentPageSlug} style={cssVars}>
+<html lang="en" data-slug={site.slug} data-page-slug={currentPageSlug} style={cssVars}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -157,9 +157,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
                 // Special page: render legal content directly, skip components fetch
                 if (currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies") {
+                  var LEGAL_TITLES = { "aviso-legal": "Legal Notice", "politica-cookies": "Cookie Policy" };
                   var pageContent = document.getElementById('page-content');
                   if (pageContent) {
-                    pageContent.innerHTML = buildLegalHtml(currentPage.title, currentPage.content || null);
+                    var legalTitle = LEGAL_TITLES[currentPage.slug] || currentPage.title;
+                    pageContent.innerHTML = buildLegalHtml(legalTitle, currentPage.content || null);
                   }
                   return;
                 }
@@ -253,13 +255,16 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
 
+        var NAV_TITLES = { home: "Home", proyectos: "Projects" };
+
         function buildMenuHtml(navPages, siteSlug, currentPageSlug) {
           var links = navPages.map(function (p) {
             var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
             var cls = p.slug === currentPageSlug
               ? "text-sm tracking-wide transition-opacity font-semibold opacity-100"
               : "text-sm tracking-wide transition-opacity opacity-60 hover:opacity-100";
-            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(p.title) + '</a></li>';
+            var label = NAV_TITLES[p.slug] || p.title;
+            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a></li>';
           }).join("");
           return '<ul class="hidden md:flex items-center gap-8 flex-1">' + links + '</ul>';
         }
@@ -270,7 +275,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var cls = p.slug === currentPageSlug
               ? "text-sm tracking-wide font-semibold opacity-100"
               : "text-sm tracking-wide opacity-60";
-            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(p.title) + '</a>';
+            var label = NAV_TITLES[p.slug] || p.title;
+            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a>';
           }).join("");
 
           var socials = buildSocialsHtml(site);
@@ -284,7 +290,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         }
 
         function buildHamburgerHtml(site) {
-          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Abrir menú" style="color:var(--color-tertiary);">' + SVG_HAMBURGER + '</button>';
+          return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Open menu" style="color:var(--color-tertiary);">' + SVG_HAMBURGER + '</button>';
         }
 
         function renderNavigation(site, navPages, siteSlug, currentPageSlug) {
@@ -426,8 +432,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var controlsHtml = "";
           if (isCarousel) {
             controlsHtml =
-              '<button class="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-prev aria-label="Slide anterior">' + prevSvg + '</button>' +
-              '<button class="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-next aria-label="Siguiente slide">' + nextSvg + '</button>';
+              '<button class="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-prev aria-label="Previous slide">' + prevSvg + '</button>' +
+              '<button class="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors" data-carousel-next aria-label="Next slide">' + nextSvg + '</button>';
           }
 
           return '<header data-component="header" class="relative w-full h-screen overflow-hidden">' + slidesHtml + controlsHtml + '</header>';
@@ -717,11 +723,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               : '';
 
             var dir1Html = direccion1
-              ? '<span style="' + locationLabelStyle + '">Localización 1</span>' +
+              ? '<span style="' + locationLabelStyle + '">Location 1</span>' +
                 '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion1) + '</p>'
               : '';
             var dir2Html = direccion2
-              ? '<span style="' + locationLabelStyle + '">Localización 2</span>' +
+              ? '<span style="' + locationLabelStyle + '">Location 2</span>' +
                 '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion2) + '</p>'
               : '';
 
@@ -745,25 +751,25 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">' +
                   '<input type="text" name="website" tabindex="-1" autocomplete="off" />' +
                 '</div>' +
-                '<div><label style="' + labelStyle + '">Nombre *</label>' +
+                '<div><label style="' + labelStyle + '">Name *</label>' +
                   '<input type="text" name="nombre" required style="' + inputStyle + '" /></div>' +
-                '<div><label style="' + labelStyle + '">Compañía</label>' +
+                '<div><label style="' + labelStyle + '">Company</label>' +
                   '<input type="text" name="compania" style="' + inputStyle + '" /></div>' +
                 '<div><label style="' + labelStyle + '">Email *</label>' +
                   '<input type="email" name="email" required style="' + inputStyle + '" /></div>' +
-                '<div><label style="' + labelStyle + '">Mensaje</label>' +
+                '<div><label style="' + labelStyle + '">Message</label>' +
                   '<textarea name="mensaje" rows="4" style="' + inputStyle + 'resize:none;"></textarea></div>' +
                 '<div style="display:flex;align-items:flex-start;gap:0.625rem;">' +
                   '<input type="checkbox" name="privacidad" id="contact-privacidad" required style="margin-top:0.2rem;accent-color:var(--color-primary);flex-shrink:0;width:1rem;height:1rem;cursor:pointer;" />' +
                   '<label for="contact-privacidad" style="font-size:0.8125rem;line-height:1.5;color:var(--color-primary);opacity:0.75;cursor:pointer;">' +
-                    'He leído y acepto la ' +
-                    '<a href="' + avisoLegalHref + '" style="color:var(--color-primary);text-decoration:underline;opacity:1;">política de privacidad</a>' +
+                    'I have read and accept the ' +
+                    '<a href="' + avisoLegalHref + '" style="color:var(--color-primary);text-decoration:underline;opacity:1;">privacy policy</a>' +
                   '</label>' +
                 '</div>' +
                 '<div class="flex items-center gap-4">' +
-                  '<button type="submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">Enviar mensaje</button>' +
-                  '<span data-contact-success style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">¡Mensaje enviado correctamente!</span>' +
-                  '<span data-contact-error style="display:none;font-size:0.875rem;color:#e53e3e;">Ha ocurrido un error. Por favor, inténtalo de nuevo.</span>' +
+                  '<button type="submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">Send message</button>' +
+                  '<span data-contact-success style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">Message sent successfully!</span>' +
+                  '<span data-contact-error style="display:none;font-size:0.875rem;color:#e53e3e;">An error occurred. Please try again.</span>' +
                 '</div>' +
               '</form>';
 

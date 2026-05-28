@@ -28,6 +28,11 @@ if (!currentPage) {
 
 const isLegal = currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies";
 
+const LEGAL_TITLES: Record<string, string> = {
+  "aviso-legal": "Legal Notice",
+  "politica-cookies": "Cookie Policy",
+};
+
 const components = isLegal ? [] : await getPageComponents(currentPage.id);
 
 let projects: Project[] = [];
@@ -63,7 +68,7 @@ if (projectOrder.length > 0) {
 
 <BaseLayout site={site} pages={pages} currentPageSlug={currentPage.slug}>
   {isLegal ? (
-    <LegalPage title={currentPage.title} content={currentPage.content} />
+    <LegalPage title={LEGAL_TITLES[currentPage.slug] ?? currentPage.title} content={currentPage.content} />
   ) : (
     <div class="flex flex-col gap-8">
       {components.map((component) => {

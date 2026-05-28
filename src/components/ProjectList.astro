@@ -28,19 +28,19 @@ const allCategories = Array.from(
   <div class={fullWidth ? "w-full" : "max-w-7xl mx-auto"}>
 
     <div class="flex items-start justify-between mb-10 gap-6">
-      <h1 class="text-4xl font-bold text-neutral-900 tracking-wide shrink-0" style="font-family: var(--title-font);">Proyectos</h1>
+      <h1 class="text-4xl font-bold text-neutral-900 tracking-wide shrink-0" style="font-family: var(--title-font);">Projects</h1>
 
       <div class="flex flex-col items-end gap-3">
         <div class="flex items-center gap-4">
           <!-- View toggle -->
           <div class="flex items-center gap-1">
-            <button id="btn-view-grid" class="p-1.5 text-neutral-900 transition-colors" aria-label="Vista cuadrícula" title="Vista cuadrícula">
+            <button id="btn-view-grid" class="p-1.5 text-neutral-900 transition-colors" aria-label="Grid view" title="Grid view">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                 <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
               </svg>
             </button>
-            <button id="btn-view-list" class="p-1.5 text-neutral-400 transition-colors" aria-label="Vista lista" title="Vista lista">
+            <button id="btn-view-list" class="p-1.5 text-neutral-400 transition-colors" aria-label="List view" title="List view">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
@@ -54,7 +54,7 @@ const allCategories = Array.from(
                 class="appearance-none pl-3 pr-8 py-1.5 text-xs font-semibold border border-neutral-900 bg-white text-neutral-900 cursor-pointer focus:outline-none"
                 style="font-family: var(--font-family);"
               >
-                <option value="">Filtrar por categoría</option>
+                <option value="">Filter by category</option>
                 {allCategories.map((cat) => (
                   <option value={cat}>{cat}</option>
                 ))}
@@ -299,7 +299,7 @@ const allCategories = Array.from(
     pill.className = "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-neutral-900 text-white";
     pill.style.fontFamily = "var(--font-family)";
     pill.dataset.category = category;
-    pill.innerHTML = `${category}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Eliminar filtro ${category}">✕</button>`;
+    pill.innerHTML = `${category}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Remove filter ${category}">✕</button>`;
 
     pill.querySelector("button")!.addEventListener("click", () => {
       activeFilters.delete(category);
