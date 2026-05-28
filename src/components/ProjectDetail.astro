@@ -11,6 +11,11 @@ interface Props {
 const { project, siteSlug, detailType = 1, fullWidth = false } = Astro.props;
 const wrapClass = fullWidth ? "w-full" : "max-w-screen-xl mx-auto";
 const collaborators = project.projectCollaborators ?? [];
+const collaboratorGroups = collaborators.reduce<{ profession: string; names: string[] }[]>((acc, c) => {
+  const existing = acc.find((g) => g.profession === c.profession);
+  if (existing) { existing.names.push(c.name); } else { acc.push({ profession: c.profession, names: [c.name] }); }
+  return acc;
+}, []);
 const images = (project.image_data || []).filter((img) => img.url);
 const heroImage = images[0];
 const galleryImages = images.slice(1);
@@ -46,23 +51,15 @@ while (imgIdx < remainingImages.length || paraIdx < descParagraphs.length) {
   }
 }
 
-// Group gallery into rows: first image solo, then pairs, trailing solo if odd
 type GalleryRow =
   | { type: "solo"; img: (typeof galleryImages)[0] }
-  | { type: "duo"; a: (typeof galleryImages)[0]; b: (typeof galleryImages)[0] };
+  | { type: "multi"; imgs: typeof galleryImages };
 
 const galleryRows: GalleryRow[] = [];
 if (galleryImages.length > 0) {
   galleryRows.push({ type: "solo", img: galleryImages[0] });
-  let i = 1;
-  while (i < galleryImages.length) {
-    if (i + 1 < galleryImages.length) {
-      galleryRows.push({ type: "duo", a: galleryImages[i], b: galleryImages[i + 1] });
-      i += 2;
-    } else {
-      galleryRows.push({ type: "solo", img: galleryImages[i] });
-      i += 1;
-    }
+  if (galleryImages.length > 1) {
+    galleryRows.push({ type: "multi", imgs: galleryImages.slice(1) });
   }
 }
 ---
@@ -121,19 +118,19 @@ if (galleryImages.length > 0) {
     {collaborators.length > 0 && (
       <div class="px-6 md:px-12 lg:px-20 py-10">
         <div class={`${wrapClass} flex flex-col gap-3`}>
-          {collaborators.map((c) => (
+          {collaboratorGroups.map((g) => (
             <div class="flex items-baseline gap-6">
               <span
                 class="text-xs tracking-[0.2em] uppercase text-neutral-400 w-32 shrink-0"
                 style="font-family: var(--font-family);"
               >
-                {c.profession}
+                {g.profession}
               </span>
               <span
                 class="text-sm text-neutral-700"
                 style="font-family: var(--font-family);"
               >
-                {c.name}
+                {g.names.join(" · ")}
               </span>
             </div>
           ))}
@@ -259,7 +256,7 @@ if (galleryImages.length > 0) {
       <div class={wrapClass}>
 
         <!-- Title + meta -->
-        <div class="pb-10 border-b border-neutral-200">
+        <div class="pb-10">
           <h1
             class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] uppercase mb-6"
             style="font-family: var(--title-font);"
@@ -289,23 +286,36 @@ if (galleryImages.length > 0) {
           </div>
         </div>
 
-        <!-- Description -->
-        {project.description && (
-          <div class="mt-10 mb-20">
-            <p
-              class="text-sm text-neutral-600 leading-[2.15]"
-              style="font-family: var(--font-family);"
-            >
-              {project.description}
-            </p>
+        <!-- Collaborators -->
+        {collaborators.length > 0 && (
+          <div class="py-10">
+            <div class="flex flex-col gap-3">
+              {collaboratorGroups.map((g) => (
+                <div class="flex items-baseline gap-6">
+                  <span
+                    class="text-xs tracking-[0.2em] uppercase text-neutral-400 w-32 shrink-0"
+                    style="font-family: var(--font-family);"
+                  >
+                    {g.profession}
+                  </span>
+                  <span
+                    class="text-sm text-neutral-700"
+                    style="font-family: var(--font-family);"
+                  >
+                    {g.names.join(" · ")}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
+
       </div>
     </div>
 
     <!-- Gallery -->
     {galleryRows.length > 0 && (
-      <div class="px-6 md:px-12 lg:px-20 pb-28">
+      <div class="px-6 md:px-12 lg:px-20 pt-10 pb-10">
         <div class={`${wrapClass} flex flex-col gap-4`}>
           {galleryRows.map((row) =>
             row.type === "solo" ? (
@@ -320,30 +330,35 @@ if (galleryImages.length > 0) {
                 />
               </div>
             ) : (
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="overflow-hidden bg-neutral-100">
-                  <img
-                    src={row.a.url}
-                    alt={project.title}
-                    class="w-full h-full object-cover aspect-[4/5]"
-                    data-lightbox
-                    data-lightbox-group="project-gallery"
-                    style="cursor:zoom-in;"
-                  />
-                </div>
-                <div class="overflow-hidden bg-neutral-100">
-                  <img
-                    src={row.b.url}
-                    alt={project.title}
-                    class="w-full h-full object-cover aspect-[4/5]"
-                    data-lightbox
-                    data-lightbox-group="project-gallery"
-                    style="cursor:zoom-in;"
-                  />
-                </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {row.imgs.map((img) => (
+                  <div class="overflow-hidden bg-neutral-100">
+                    <img
+                      src={img.url}
+                      alt={project.title}
+                      class="w-full h-full object-cover aspect-[4/5]"
+                      data-lightbox
+                      data-lightbox-group="project-gallery"
+                      style="cursor:zoom-in;"
+                    />
+                  </div>
+                ))}
               </div>
             )
           )}
+        </div>
+      </div>
+    )}
+
+    <!-- Description -->
+    {project.description && (
+      <div class="px-6 md:px-12 lg:px-20 pt-10 pb-28">
+        <div class={wrapClass}>
+          <div
+            class="text-sm text-neutral-600 leading-[2.15]"
+            style="font-family: var(--font-family);"
+            set:html={project.description}
+          />
         </div>
       </div>
     )}
