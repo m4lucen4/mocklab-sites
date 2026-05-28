@@ -863,34 +863,92 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           return str.replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // ─── Lightbox ────────────────────────────────────────────────────────
+        // ─── Lightbox / Carousel ─────────────────────────────────────────────
         function initLightbox() {
           var lb = document.createElement('div');
-          lb.style.cssText = 'position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);cursor:zoom-out;';
+          lb.style.cssText = 'position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);';
+
           var lbImg = document.createElement('img');
-          lbImg.style.cssText = 'max-width:95vw;max-height:95vh;object-fit:contain;display:block;cursor:default;';
+          lbImg.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;display:block;user-select:none;';
+
+          var lbCounter = document.createElement('div');
+          lbCounter.style.cssText = 'position:absolute;top:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.5);font-size:12px;letter-spacing:0.2em;font-family:sans-serif;';
+
+          var btnStyle = 'position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:white;padding:20px;opacity:0.6;line-height:0;';
+
+          var lbPrev = document.createElement('button');
+          lbPrev.style.cssText = btnStyle + 'left:12px;';
+          lbPrev.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>';
+
+          var lbNext = document.createElement('button');
+          lbNext.style.cssText = btnStyle + 'right:12px;';
+          lbNext.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+          var lbClose = document.createElement('button');
+          lbClose.style.cssText = 'position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:white;padding:8px;opacity:0.6;line-height:0;';
+          lbClose.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
           lb.appendChild(lbImg);
+          lb.appendChild(lbCounter);
+          lb.appendChild(lbPrev);
+          lb.appendChild(lbNext);
+          lb.appendChild(lbClose);
           document.body.appendChild(lb);
+
+          var imgs = [];
+          var idx = 0;
+
+          function show(i) {
+            idx = (i + imgs.length) % imgs.length;
+            lbImg.src = imgs[idx];
+            var single = imgs.length <= 1;
+            lbCounter.style.display = single ? 'none' : '';
+            lbPrev.style.display = single ? 'none' : '';
+            lbNext.style.display = single ? 'none' : '';
+            if (!single) lbCounter.textContent = (idx + 1) + ' / ' + imgs.length;
+          }
+
+          function open(sources, startIdx) {
+            imgs = sources;
+            show(startIdx);
+            lb.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
+
+          function close() {
+            lb.style.display = 'none';
+            document.body.style.overflow = '';
+            lbImg.src = '';
+            imgs = [];
+          }
 
           document.addEventListener('click', function (e) {
             var el = e.target;
             if (el.tagName === 'IMG' && el.hasAttribute('data-lightbox')) {
-              lbImg.src = el.src;
-              lb.style.display = 'flex';
-              document.body.style.overflow = 'hidden';
-            } else if (lb.style.display === 'flex') {
-              lb.style.display = 'none';
-              document.body.style.overflow = '';
-              lbImg.src = '';
+              var group = el.getAttribute('data-lightbox-group');
+              if (group) {
+                var groupEls = Array.from(document.querySelectorAll('img[data-lightbox-group="' + group + '"]'));
+                var start = groupEls.indexOf(el);
+                open(groupEls.map(function (i) { return i.src; }), start >= 0 ? start : 0);
+              } else {
+                open([el.src], 0);
+              }
+              return;
+            }
+            if (lb.style.display === 'flex' && !lbPrev.contains(e.target) && !lbNext.contains(e.target) && !lbClose.contains(e.target)) {
+              close();
             }
           });
 
+          lbPrev.addEventListener('click', function (e) { e.stopPropagation(); show(idx - 1); });
+          lbNext.addEventListener('click', function (e) { e.stopPropagation(); show(idx + 1); });
+          lbClose.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+
           document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && lb.style.display === 'flex') {
-              lb.style.display = 'none';
-              document.body.style.overflow = '';
-              lbImg.src = '';
-            }
+            if (lb.style.display !== 'flex') return;
+            if (e.key === 'Escape') close();
+            if (e.key === 'ArrowLeft') show(idx - 1);
+            if (e.key === 'ArrowRight') show(idx + 1);
           });
         }
 
