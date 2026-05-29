@@ -78,6 +78,10 @@ export interface RichTextConfig {
   alignment: "left" | "right";
 }
 
+export interface SeparatorConfig {
+  size: "small" | "medium" | "large";
+}
+
 export interface ProjectColumnsConfig {
   columns: 1 | 2;
   project_1?: string;

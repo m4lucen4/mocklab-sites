@@ -198,6 +198,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                         if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
                         if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
                         if (comp.type === 'rich_text') compHtml = buildRichTextHtml(comp.config);
+                        if (comp.type === 'separator') compHtml = buildSeparatorHtml(comp.config);
                         if (comp.type === 'project_columns') {
                           compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
                           pcIndex++;
@@ -678,6 +679,12 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               '</div>' +
             '</section>';
           }
+        }
+
+        function buildSeparatorHtml(config) {
+          var sizeMap = { small: '40px', medium: '80px', large: '128px' };
+          var height = (config && sizeMap[config.size]) || '80px';
+          return '<div data-component="separator" style="height:' + height + ';"></div>';
         }
 
         function buildRichTextHtml(config) {

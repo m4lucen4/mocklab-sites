@@ -1,6 +1,6 @@
 ---
 import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { SiteComponent, BodyConfig, ProjectColumnsConfig, RichTextConfig, Project } from "../../types";
+import type { SiteComponent, BodyConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, Project } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import CTA from "../../components/CTA.astro";
@@ -50,6 +50,11 @@ if (components.some((c) => c.type === "project_columns")) {
     }
     if (component.type === "rich_text") {
       return <RichText config={component.config as RichTextConfig} />;
+    }
+    if (component.type === "separator") {
+      const sizeMap = { small: "40px", medium: "80px", large: "128px" };
+      const { size } = component.config as SeparatorConfig;
+      return <div data-component="separator" style={`height:${sizeMap[size] ?? "80px"}`} />;
     }
     return null;
   })}
