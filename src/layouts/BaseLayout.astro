@@ -521,9 +521,9 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var descStyle = 'align-self:end;padding:2rem 2.5rem;color:var(--color-primary);';
 
           function imgCell(url, wide) {
-            if (!url) return '';
             var cls = wide ? 'img-wrapper-wide' : 'img-wrapper';
-            return '<div class="' + cls + '"><img src="' + escapeAttr(url) + '" alt="" style="' + imgStyle + '" /></div>';
+            var img = url ? '<img src="' + escapeAttr(url) + '" alt="" style="' + imgStyle + '" />' : '';
+            return '<div class="' + cls + '">' + img + '</div>';
           }
 
           var inner = '';

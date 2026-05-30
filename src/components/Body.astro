@@ -15,40 +15,40 @@ const descStyle = "align-self: end; padding: 2rem 2.5rem; color: var(--color-pri
 
 {type === 1 && (
   <section data-component="body" class="body-grid body-grid-1">
-    {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
-    {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
+    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 2 && (
   <section data-component="body" class="body-grid body-grid-2">
-    {image_1 && <div class="img-wrapper-wide"><img src={image_1} alt="" style={imgStyle} /></div>}
+    <div class="img-wrapper-wide">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 3 && (
   <section data-component="body" class="body-grid body-grid-3">
-    {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
-    {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
-    {image_3 && <div class="img-wrapper"><img src={image_3} alt="" style={imgStyle} /></div>}
+    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 4 && (
   <section data-component="body" class="body-grid body-grid-4">
-    {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
-    {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
-    {image_3 && <div class="img-wrapper-wide"><img src={image_3} alt="" style={imgStyle} /></div>}
+    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper-wide">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
   </section>
 )}
 
 {type === 5 && (
   <section data-component="body" class="body-grid body-grid-5">
-    {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
-    {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
-    {image_3 && <div class="img-wrapper"><img src={image_3} alt="" style={imgStyle} /></div>}
+    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
   </section>
 )}
