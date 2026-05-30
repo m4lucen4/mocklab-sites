@@ -18,6 +18,7 @@ export interface Site {
   background_color: string | null;
   tertiary_color?: string | null;
   full_width?: boolean;
+  navbar_transparent?: boolean;
   published: boolean;
   created_at: string;
   updated_at: string;

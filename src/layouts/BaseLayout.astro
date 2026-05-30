@@ -76,7 +76,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -331,6 +331,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               '</div>';
           }
 
+          if (site.navbar_transparent) {
+            nav.setAttribute('data-transparent', 'true');
+          } else {
+            nav.removeAttribute('data-transparent');
+          }
           nav.innerHTML = innerHtml + mobileHtml;
 
           // Re-attach mobile hamburger listener
@@ -909,7 +914,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         // ─── Lightbox / Carousel ─────────────────────────────────────────────
         function initLightbox() {
           var lb = document.createElement('div');
-          lb.style.cssText = 'position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);';
+          lb.style.cssText = 'position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);';
 
           var lbImg = document.createElement('img');
           lbImg.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;display:block;user-select:none;';
