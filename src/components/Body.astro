@@ -44,3 +44,11 @@ const descStyle = "align-self: end; padding: 2rem 2.5rem; color: var(--color-pri
     {image_3 && <div class="img-wrapper-wide"><img src={image_3} alt="" style={imgStyle} /></div>}
   </section>
 )}
+
+{type === 5 && (
+  <section data-component="body" class="body-grid body-grid-5">
+    {image_1 && <div class="img-wrapper"><img src={image_1} alt="" style={imgStyle} /></div>}
+    {image_2 && <div class="img-wrapper"><img src={image_2} alt="" style={imgStyle} /></div>}
+    {image_3 && <div class="img-wrapper"><img src={image_3} alt="" style={imgStyle} /></div>}
+  </section>
+)}

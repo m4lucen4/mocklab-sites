@@ -536,6 +536,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3) + desc;
           } else if (type === 4) {
             inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3, true);
+          } else if (type === 5) {
+            inner = imgCell(config.image_1) + imgCell(config.image_2) + imgCell(config.image_3);
           }
 
           return '<section data-component="body" class="body-grid body-grid-' + type + '">' + inner + '</section>';

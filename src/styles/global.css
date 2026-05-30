@@ -16,9 +16,13 @@
 @media (min-width: 520px) {
   .body-grid { grid-template-columns: 1fr 1fr; }
 }
+@media (min-width: 768px) {
+  .body-grid-5 { grid-template-columns: 1fr 1fr 1fr; }
+}
 @media (min-width: 1024px) {
   .body-grid-1 { grid-template-columns: 1fr 1fr 1fr; }
   .body-grid-2 { grid-template-columns: 1fr 1fr; }
   .body-grid-3 { grid-template-columns: 1fr 1fr 1fr 1fr; }
   .body-grid-4 { grid-template-columns: 1fr 1fr 2fr; }
+  .body-grid-5 { grid-template-columns: 1fr 1fr 1fr; }
 }
