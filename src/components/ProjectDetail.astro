@@ -124,11 +124,11 @@ if (galleryImages.length > 0) {
     <!-- Collaborators -->
     {collaborators.length > 0 && (
       <div class="px-6 md:px-12 lg:px-20 py-10">
-        <div class={`${wrapClass} flex flex-col gap-3`}>
+        <div class={`${wrapClass} grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 items-baseline`}>
           {collaboratorGroups.map((g) => (
-            <div class="flex items-baseline gap-6">
+            <>
               <span
-                class="text-xs tracking-[0.2em] uppercase text-neutral-400 w-32 shrink-0"
+                class="text-xs tracking-[0.2em] uppercase text-neutral-400"
                 style="font-family: var(--font-family);"
               >
                 {g.profession}
@@ -139,7 +139,7 @@ if (galleryImages.length > 0) {
               >
                 {g.names.join(" · ")}
               </span>
-            </div>
+            </>
           ))}
         </div>
       </div>
@@ -184,7 +184,7 @@ if (galleryImages.length > 0) {
 
               {section.para && (
                 <p
-                  class="text-xl text-neutral-600 leading-tight w-full md:w-1/2"
+                  class="text-lg text-neutral-600 leading-tight w-full md:w-1/2"
                   style="font-family: var(--font-family);"
                 >
                   {section.para}
@@ -296,11 +296,11 @@ if (galleryImages.length > 0) {
         <!-- Collaborators -->
         {collaborators.length > 0 && (
           <div class="py-10">
-            <div class="flex flex-col gap-3">
+            <div class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 items-baseline">
               {collaboratorGroups.map((g) => (
-                <div class="flex items-baseline gap-6">
+                <>
                   <span
-                    class="text-xs tracking-[0.2em] uppercase text-neutral-400 w-32 shrink-0"
+                    class="text-xs tracking-[0.2em] uppercase text-neutral-400"
                     style="font-family: var(--font-family);"
                   >
                     {g.profession}
@@ -311,7 +311,7 @@ if (galleryImages.length > 0) {
                   >
                     {g.names.join(" · ")}
                   </span>
-                </div>
+                </>
               ))}
             </div>
           </div>
@@ -362,7 +362,7 @@ if (galleryImages.length > 0) {
       <div class="px-6 md:px-12 lg:px-20 pt-10 pb-28">
         <div class={wrapClass}>
           <div
-            class="text-xl text-neutral-600 leading-tight [&>p]:mb-4 [&>p:last-child]:mb-0"
+            class="text-lg text-neutral-600 leading-tight [&>p]:mb-4 [&>p:last-child]:mb-0"
             style="font-family: var(--font-family);"
             set:html={descriptionHtml}
           />
