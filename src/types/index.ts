@@ -82,6 +82,12 @@ export interface SeparatorConfig {
   size: "small" | "medium" | "large";
 }
 
+export interface FigureConfig {
+  image_url: string;
+  caption: string;
+  size: "half" | "full";
+}
+
 export interface ProjectColumnsConfig {
   columns: 1 | 2;
   project_1?: string;

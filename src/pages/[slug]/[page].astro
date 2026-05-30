@@ -1,6 +1,6 @@
 ---
 import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig } from "../../types";
+import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -10,6 +10,7 @@ import Content from "../../components/Content.astro";
 import LegalPage from "../../components/LegalPage.astro";
 import ProjectColumns from "../../components/ProjectColumns.astro";
 import RichText from "../../components/RichText.astro";
+import Figure from "../../components/Figure.astro";
 
 const { slug, page: pageSlug } = Astro.params;
 
@@ -94,6 +95,9 @@ if (projectOrder.length > 0) {
           const sizeMap = { small: "40px", medium: "80px", large: "128px" };
           const { size } = component.config as SeparatorConfig;
           return <div data-component="separator" style={`height:${sizeMap[size] ?? "80px"}`} />;
+        }
+        if (component.type === "figure") {
+          return <Figure config={component.config as FigureConfig} />;
         }
         return null;
       })}

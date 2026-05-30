@@ -199,6 +199,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                         if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
                         if (comp.type === 'rich_text') compHtml = buildRichTextHtml(comp.config);
                         if (comp.type === 'separator') compHtml = buildSeparatorHtml(comp.config);
+                        if (comp.type === 'figure') compHtml = buildFigureHtml(comp.config);
                         if (comp.type === 'project_columns') {
                           compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
                           pcIndex++;
@@ -687,6 +688,22 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var sizeMap = { small: '40px', medium: '80px', large: '128px' };
           var height = (config && sizeMap[config.size]) || '80px';
           return '<div data-component="separator" style="height:' + height + ';"></div>';
+        }
+
+        function buildFigureHtml(config) {
+          if (!config || !config.image_url) return '';
+          var size = config.size || 'full';
+          var caption = config.caption || '';
+          var figClass = size === 'half' ? 'w-full md:w-1/2 mx-auto' : 'w-full';
+          var captionHtml = caption
+            ? '<figcaption class="text-sm mt-3" style="color:var(--color-secondary);">' + escapeHtml(caption) + '</figcaption>'
+            : '';
+          return '<section data-component="figure" class="px-6 md:px-16 py-8">' +
+            '<figure class="' + figClass + '">' +
+              '<img src="' + escapeAttr(config.image_url) + '" alt="' + escapeAttr(caption) + '" class="w-full block" />' +
+              captionHtml +
+            '</figure>' +
+          '</section>';
         }
 
         function buildRichTextHtml(config) {
