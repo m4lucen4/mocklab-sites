@@ -6,6 +6,19 @@ interface Props {
 }
 
 const { config } = Astro.props;
+
+const widthClass = {
+  full: "w-full",
+  "two-thirds": "w-full md:w-2/3",
+  half: "w-full md:w-1/2",
+}[config.width ?? "full"];
+
+const alignClass =
+  (config.width ?? "full") === "full"
+    ? ""
+    : config.alignment === "right"
+      ? "ml-auto"
+      : "mr-auto";
 ---
 
 <section
@@ -14,8 +27,8 @@ const { config } = Astro.props;
   style={`color: var(--color-primary);`}
 >
   <div
-    class="html-content text-base leading-relaxed w-full md:w-1/2"
-    style={`text-align: ${config.alignment}; ${config.alignment === 'right' ? 'margin-left: auto;' : ''}`}
+    class={`html-content text-base leading-relaxed ${widthClass} ${alignClass}`}
+    style={`text-align: ${config.alignment};`}
     set:html={config.content}
   />
 </section>

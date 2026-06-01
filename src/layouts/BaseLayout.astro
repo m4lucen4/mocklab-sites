@@ -715,9 +715,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           if (!config) return '';
           var alignment = config.alignment || 'left';
           var content = config.content || '';
-          var marginStyle = alignment === 'right' ? 'margin-left:auto;' : '';
+          var width = config.width || 'full';
+          var widthClass = width === 'half' ? 'w-full md:w-1/2' : width === 'two-thirds' ? 'w-full md:w-2/3' : 'w-full';
+          var alignClass = width === 'full' ? '' : alignment === 'right' ? 'ml-auto' : 'mr-auto';
           return '<section data-component="rich_text" class="px-6 md:px-16 py-8" style="color:var(--color-primary);">' +
-            '<div class="html-content text-base leading-relaxed" style="width:50%;text-align:' + escapeAttr(alignment) + ';' + marginStyle + '">' + content + '</div>' +
+            '<div class="html-content text-base leading-relaxed ' + widthClass + ' ' + alignClass + '" style="text-align:' + escapeAttr(alignment) + ';">' + content + '</div>' +
           '</section>';
         }
 

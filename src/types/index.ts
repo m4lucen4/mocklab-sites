@@ -77,6 +77,7 @@ export interface ProjectListConfig {
 export interface RichTextConfig {
   content: string;
   alignment: "left" | "right";
+  width?: "full" | "half" | "two-thirds";
 }
 
 export interface SeparatorConfig {
