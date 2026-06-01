@@ -73,22 +73,7 @@ if (galleryImages.length > 0) {
 
 {detailType === 2 ? (
 
-  <article data-preserve>
-
-    <!-- Back navigation -->
-    <div class="pt-8 pb-0 px-6 md:px-12 lg:px-20">
-      <a
-        href={`/${siteSlug}/proyectos`}
-        class="inline-flex items-center gap-2.5 transition-opacity hover:opacity-60"
-        style="font-family: var(--font-family); color: var(--color-primary);"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        <span class="text-xs tracking-[0.2em] uppercase">Projects</span>
-      </a>
-    </div>
+  <article data-preserve class="pt-16">
 
     <!-- Title + year -->
     <div class="px-6 md:px-12 lg:px-20 pt-12 pb-14">
@@ -225,21 +210,6 @@ if (galleryImages.length > 0) {
 ) : (
 
   <article data-preserve>
-
-    <!-- Back navigation -->
-    <div class="absolute top-0 left-0 pt-6 px-6 md:px-12 z-10">
-      <a
-        href={`/${siteSlug}/proyectos`}
-        class="inline-flex items-center gap-2.5 text-white mix-blend-difference transition-opacity hover:opacity-60"
-        style="font-family: var(--font-family);"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        <span class="text-xs tracking-[0.2em] uppercase">Projects</span>
-      </a>
-    </div>
 
     <!-- Hero image -->
     {heroImage ? (

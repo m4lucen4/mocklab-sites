@@ -55,6 +55,27 @@ export async function getPageComponents(pageId: string): Promise<SiteComponent[]
   return data as SiteComponent[];
 }
 
+export async function getProjectListComponent(siteId: string): Promise<SiteComponent | null> {
+  const { data: pageData, error: pageError } = await supabase
+    .from("site_pages")
+    .select("id")
+    .eq("site_id", siteId)
+    .eq("slug", "proyectos")
+    .single();
+
+  if (pageError || !pageData) return null;
+
+  const { data, error } = await supabase
+    .from("site_components")
+    .select("*")
+    .eq("page_id", pageData.id)
+    .eq("type", "project_list")
+    .single();
+
+  if (error) return null;
+  return data as SiteComponent;
+}
+
 export async function getUserProjects(userId: string): Promise<Project[]> {
   const { data, error } = await supabaseAdmin
     .from("projects")
