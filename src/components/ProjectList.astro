@@ -10,6 +10,13 @@ interface Props {
 
 const { projects, siteSlug, layout = "grid-4", fullWidth = false } = Astro.props;
 
+const groups: Project[][] = [];
+if (layout === "grid-alternating") {
+  for (let i = 0; i < projects.length; i += 3) {
+    groups.push(projects.slice(i, i + 3));
+  }
+}
+
 function truncate(text: string, maxWords = 20): string {
   const words = text.trim().split(/\s+/);
   return words.length <= maxWords ? text : words.slice(0, maxWords).join(" ") + "…";
@@ -111,48 +118,51 @@ const allCategories = Array.from(
       )}
 
       {layout === "grid-alternating" && (
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-          {projects.map((project, index) => {
-            const coverImage = project.image_data?.find((img) => img.url)?.url;
-            const groupIndex = Math.floor(index / 3);
-            const posInGroup = index % 3;
+        <div class="flex flex-col gap-6">
+          {groups.map((groupProjects, groupIndex) => {
             const isEvenGroup = groupIndex % 2 === 0;
-            const isLarge = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
-            const span = isLarge ? "md:col-span-2 lg:col-span-6" : "md:col-span-1 lg:col-span-3";
             return (
-              <a
-                href={`/${siteSlug}/proyectos/${project.id}`}
-                class:list={["project-card group block", span]}
-                data-category={project.category ?? ""}
-                data-group={String(groupIndex)}
-                data-large={isLarge ? "" : undefined}
-              >
-                <div class:list={[
-                  isLarge ? "aspect-3/2 alt-img" : "aspect-[5/7] alt-img",
-                  "overflow-hidden bg-neutral-100 mb-4"
-                ]}>
-                  {coverImage ? (
-                    <img
-                      src={coverImage}
-                      alt={project.title}
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div class="w-full h-full bg-[#e8e3d8]" />
-                  )}
-                </div>
-                <p class="text-base font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
-                {project.description && (
-                  <p class="text-sm text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">
-                    {truncate(project.description)}
-                  </p>
-                )}
-                {(project.category || project.year) && (
-                  <p class="text-xs font-bold text-neutral-900" style="font-family: var(--font-family);">
-                    {[project.category, project.year].filter(Boolean).join(" | ")}
-                  </p>
-                )}
-              </a>
+              <div class:list={["alt-row", isEvenGroup ? "alt-row-even" : "alt-row-odd"]}>
+                {groupProjects.map((project, posInGroup) => {
+                  const coverImage = project.image_data?.find((img) => img.url)?.url;
+                  const isLarge = isEvenGroup ? posInGroup === 2 : posInGroup === 0;
+                  return (
+                    <a
+                      href={`/${siteSlug}/proyectos/${project.id}`}
+                      class:list={["project-card group block", isLarge ? "alt-large" : ""]}
+                      data-category={project.category ?? ""}
+                      data-group={String(groupIndex)}
+                      data-large={isLarge ? "" : undefined}
+                    >
+                      <div class:list={[
+                        isLarge ? "aspect-[10/7] alt-img" : "aspect-[5/7] alt-img",
+                        "overflow-hidden bg-neutral-100 mb-4"
+                      ]}>
+                        {coverImage ? (
+                          <img
+                            src={coverImage}
+                            alt={project.title}
+                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div class="w-full h-full bg-[#e8e3d8]" />
+                        )}
+                      </div>
+                      <p class="text-base font-bold text-neutral-900 mb-1" style="font-family: var(--title-font);">{project.title}</p>
+                      {project.description && (
+                        <p class="text-sm text-neutral-700 mb-1 leading-relaxed" style="font-family: var(--font-family); font-weight: 400;">
+                          {truncate(project.description)}
+                        </p>
+                      )}
+                      {(project.category || project.year) && (
+                        <p class="text-xs font-bold text-neutral-900" style="font-family: var(--font-family);">
+                          {[project.category, project.year].filter(Boolean).join(" | ")}
+                        </p>
+                      )}
+                    </a>
+                  );
+                })}
+              </div>
             );
           })}
         </div>
@@ -204,6 +214,27 @@ const allCategories = Array.from(
 <style>
   .project-card.hidden-by-filter {
     display: none;
+  }
+
+  .alt-row {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .alt-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .alt-row .alt-large {
+      grid-column: span 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .alt-row-even { grid-template-columns: 1fr 1fr 2fr; }
+    .alt-row-odd  { grid-template-columns: 2fr 1fr 1fr; }
+    .alt-row .alt-large { grid-column: auto; }
   }
 </style>
 
@@ -259,8 +290,6 @@ const allCategories = Array.from(
     groups.forEach(({ smalls, large }) => {
       if (!large || smalls.length === 0) return;
       large.style.height = "";
-      const maxH = Math.max(...smalls.map((el) => el.getBoundingClientRect().height));
-      if (maxH > 0) large.style.height = maxH + "px";
     });
   }
 
