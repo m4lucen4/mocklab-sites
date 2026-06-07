@@ -15,7 +15,15 @@ const {
   vertical_align_1 = "top",
   vertical_align_2 = "top",
   horizontal_align = "between",
+  width_1col = "full",
 } = config;
+
+const widthStyleMap: Record<string, string> = {
+  full: "width: 100%;",
+  "80": "max-width: 80%; margin: 0 auto;",
+  "50": "max-width: 50%; margin: 0 auto;",
+};
+const col1WidthStyle = widthStyleMap[width_1col] ?? "width: 100%;";
 
 const p1 = project_1 ? projects.find((p) => String(p.id) === String(project_1)) : undefined;
 const p2 = project_2 ? projects.find((p) => String(p.id) === String(project_2)) : undefined;
@@ -42,7 +50,7 @@ const pcProjects = JSON.stringify([
 
 {columns === 1 && p1 && (
   <section data-component="project_columns" data-projects={pcProjects} class="py-8 px-0 md:px-10">
-    <div style="max-width: 64rem; margin: 0 auto;">
+    <div style={col1WidthStyle}>
       <a href={`/${siteSlug}/proyectos/${p1.id}`} class={`group flex flex-col ${v1Class}`} style="text-decoration: none; color: inherit;">
         <div style="overflow: hidden;">
           {p1.image_data?.[0]?.url
@@ -51,9 +59,9 @@ const pcProjects = JSON.stringify([
           }
         </div>
         <div style="margin-top: 0.75rem;">
-          <p style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-primary);">{p1.title}</p>
+          <p style="margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary);">{p1.title}</p>
           {(p1.category || p1.year) && (
-            <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--color-primary); opacity: 0.65;">
+            <p style="margin: 0.25rem 0 0; font-size: 1rem; color: var(--color-primary); opacity: 0.65;">
               {[p1.category, p1.year].filter(Boolean).join(" · ")}
             </p>
           )}
@@ -75,9 +83,9 @@ const pcProjects = JSON.stringify([
             }
           </div>
           <div class="px-4 md:px-0" style="margin-top: 0.75rem;">
-            <p style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-primary);">{p1.title}</p>
+            <p style="margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary);">{p1.title}</p>
             {(p1.category || p1.year) && (
-              <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--color-primary); opacity: 0.65;">
+              <p style="margin: 0.25rem 0 0; font-size: 1rem; color: var(--color-primary); opacity: 0.65;">
                 {[p1.category, p1.year].filter(Boolean).join(" · ")}
               </p>
             )}
@@ -93,9 +101,9 @@ const pcProjects = JSON.stringify([
             }
           </div>
           <div class="px-4 md:px-0" style="margin-top: 0.75rem;">
-            <p style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-primary);">{p2.title}</p>
+            <p style="margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--color-primary);">{p2.title}</p>
             {(p2.category || p2.year) && (
-              <p style="margin: 0.25rem 0 0; font-size: 0.875rem; color: var(--color-primary); opacity: 0.65;">
+              <p style="margin: 0.25rem 0 0; font-size: 1rem; color: var(--color-primary); opacity: 0.65;">
                 {[p2.category, p2.year].filter(Boolean).join(" · ")}
               </p>
             )}

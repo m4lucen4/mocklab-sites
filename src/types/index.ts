@@ -88,6 +88,8 @@ export interface FigureConfig {
   image_url: string;
   caption: string;
   size: "half" | "full";
+  link_url?: string;
+  link_type?: "internal" | "external";
 }
 
 export interface ProjectColumnsConfig {
@@ -97,6 +99,7 @@ export interface ProjectColumnsConfig {
   vertical_align_1?: "top" | "center" | "bottom";
   vertical_align_2?: "top" | "center" | "bottom";
   horizontal_align?: "start" | "end" | "between" | "stretch";
+  width_1col?: "full" | "80" | "50";
 }
 
 export interface ProjectCollaborator {

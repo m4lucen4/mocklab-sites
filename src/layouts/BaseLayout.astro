@@ -253,7 +253,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         function buildLogoHtml(site, siteSlug) {
           var inner = site.logo_url
             ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-8 w-auto">'
-            : '<span class="text-sm font-semibold tracking-widest" style="color:var(--color-tertiary);">' + escapeHtml(site.studio_name) + '</span>';
+            : '<span class="text-base font-semibold tracking-widest" style="color:var(--color-tertiary);">' + escapeHtml(site.studio_name) + '</span>';
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
 
@@ -263,8 +263,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var links = navPages.map(function (p) {
             var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
             var cls = p.slug === currentPageSlug
-              ? "text-sm tracking-wide transition-opacity font-semibold opacity-100"
-              : "text-sm tracking-wide transition-opacity opacity-60 hover:opacity-100";
+              ? "text-base tracking-wide transition-opacity font-semibold opacity-100"
+              : "text-base tracking-wide transition-opacity opacity-60 hover:opacity-100";
             var label = NAV_TITLES[p.slug] || p.title;
             return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a></li>';
           }).join("");
@@ -275,8 +275,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var links = navPages.map(function (p) {
             var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
             var cls = p.slug === currentPageSlug
-              ? "text-sm tracking-wide font-semibold opacity-100"
-              : "text-sm tracking-wide opacity-60";
+              ? "text-base tracking-wide font-semibold opacity-100"
+              : "text-base tracking-wide opacity-60";
             var label = NAV_TITLES[p.slug] || p.title;
             return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a>';
           }).join("");
@@ -422,7 +422,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
                   '<div class="' + bgClass + '"' + bgStyle + '>' +
                     iframeHtml +
-                    '<div class="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>' +
+                    '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
                     '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
                       '<div class="max-w-lg">' +
                         '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
@@ -659,12 +659,12 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               : '<div style="' + placeholderStyle + '"></div>';
             var meta = [p.category, p.year].filter(Boolean).join(' · ');
             var metaHtml = meta
-              ? '<p style="margin:0.25rem 0 0;font-size:0.875rem;color:var(--color-primary);opacity:0.65;">' + escapeHtml(meta) + '</p>'
+              ? '<p style="margin:0.25rem 0 0;font-size:1rem;color:var(--color-primary);opacity:0.65;">' + escapeHtml(meta) + '</p>'
               : '';
             return '<a href="' + href + '" class="flex flex-col ' + vClass + ' ' + colClass + '" style="text-decoration:none;cursor:pointer;color:inherit;">' +
               '<div style="overflow:hidden;">' + imgHtml + '</div>' +
               '<div class="px-4 md:px-0" style="margin-top:0.75rem;">' +
-                '<p style="margin:0;font-size:1rem;font-weight:600;color:var(--color-primary);">' + escapeHtml(p.title || '') + '</p>' +
+                '<p style="margin:0;font-size:1.125rem;font-weight:600;color:var(--color-primary);">' + escapeHtml(p.title || '') + '</p>' +
                 metaHtml +
               '</div>' +
             '</a>';
@@ -672,8 +672,10 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           if (columns === 1) {
             if (!p1) return '';
+            var widthStyleMap = { full: 'width:100%;', '80': 'max-width:80%;margin:0 auto;', '50': 'max-width:50%;margin:0 auto;' };
+            var col1WidthStyle = widthStyleMap[config.width_1col || 'full'] || 'width:100%;';
             return '<section data-component="project_columns" class="py-8 px-0 md:px-10">' +
-              '<div style="max-width:64rem;margin:0 auto;">' +
+              '<div style="' + col1WidthStyle + '">' +
                 cardHtml(p1, v1Class, '') +
               '</div>' +
             '</section>';
@@ -701,12 +703,17 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var caption = config.caption || '';
           var figClass = size === 'half' ? 'w-full md:w-1/2 mx-auto' : 'w-full';
           var captionHtml = caption
-            ? '<figcaption class="text-sm mt-3" style="color:var(--color-secondary);">' + escapeHtml(caption) + '</figcaption>'
+            ? '<figcaption class="text-base mt-3" style="color:var(--color-primary);">' + escapeHtml(caption) + '</figcaption>'
             : '';
+          var inner = '<img src="' + escapeAttr(config.image_url) + '" alt="' + escapeAttr(caption) + '" class="w-full block" />' + captionHtml;
+          if (config.link_url) {
+            var href = config.link_type === 'internal' ? '/' + config.link_url : config.link_url;
+            var attrs = config.link_type === 'external' ? ' target="_blank" rel="noopener noreferrer"' : '';
+            inner = '<a href="' + escapeAttr(href) + '"' + attrs + '>' + inner + '</a>';
+          }
           return '<section data-component="figure" class="px-6 md:px-16 py-8">' +
             '<figure class="' + figClass + '">' +
-              '<img src="' + escapeAttr(config.image_url) + '" alt="' + escapeAttr(caption) + '" class="w-full block" />' +
-              captionHtml +
+              inner +
             '</figure>' +
           '</section>';
         }
@@ -745,9 +752,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             ? '<div class="text-base leading-relaxed html-content" style="color:var(--color-primary);opacity:0.75;">' + descripcion + '</div>'
             : '';
 
+          var tituloDireccion1 = config.titulo_direccion1 || '';
+          var tituloDireccion2 = config.titulo_direccion2 || '';
+
           var inputStyle = 'width:100%;padding:0.625rem 1rem;font-size:0.875rem;border-radius:0.5rem;background:#ffffff;color:var(--color-primary);border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);outline:none;font-family:var(--font-family);';
           var labelStyle = 'display:block;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;margin-bottom:0.375rem;color:var(--color-primary);';
-          var locationLabelStyle = 'display:block;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;color:var(--color-primary);opacity:0.45;';
 
           if (type === 1) {
             var socialsHtml = site ? buildSocialsHtml(site) : '';
@@ -755,25 +764,33 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               ? '<div class="flex items-center gap-4 mt-6">' + socialsHtml + '</div>'
               : '';
 
+            var dir1LabelHtml = tituloDireccion1
+              ? '<span style="display:block;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.75rem;color:var(--color-primary);opacity:0.45;">' + escapeHtml(tituloDireccion1) + '</span>'
+              : '';
             var dir1Html = direccion1
-              ? '<span style="' + locationLabelStyle + '">Location 1</span>' +
-                '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion1) + '</p>'
+              ? dir1LabelHtml + '<div class="html-content" style="color:var(--color-primary);opacity:0.75;">' + direccion1 + '</div>'
+              : '';
+
+            var dir2LabelHtml = tituloDireccion2
+              ? '<span style="display:block;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.75rem;color:var(--color-primary);opacity:0.45;">' + escapeHtml(tituloDireccion2) + '</span>'
               : '';
             var dir2Html = direccion2
-              ? '<span style="' + locationLabelStyle + '">Location 2</span>' +
-                '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:0;">' + escapeHtml(direccion2) + '</p>'
+              ? dir2LabelHtml + '<div class="html-content" style="color:var(--color-primary);opacity:0.75;">' + direccion2 + '</div>'
               : '';
 
             return '<section data-component="contact" class="px-6 md:px-16 py-16 md:py-24">' +
               '<div class="flex flex-col md:flex-row gap-12 md:gap-8">' +
                 '<div class="w-full md:w-1/2">' + antetituloHtml + tituloHtml + descripcionHtml + socialsRow + '</div>' +
-                '<div class="w-full md:w-1/4 self-center">' + dir1Html + '</div>' +
-                '<div class="w-full md:w-1/4 self-center">' + dir2Html + '</div>' +
+                '<div class="w-full md:w-1/4 self-start">' + dir1Html + '</div>' +
+                '<div class="w-full md:w-1/4 self-start">' + dir2Html + '</div>' +
               '</div>' +
             '</section>';
           } else {
+            var dir1LabelHtml2 = tituloDireccion1
+              ? '<span style="display:block;font-size:0.6875rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.75rem;color:var(--color-primary);opacity:0.45;">' + escapeHtml(tituloDireccion1) + '</span>'
+              : '';
             var dir1Html2 = direccion1
-              ? '<p style="color:var(--color-primary);opacity:0.75;white-space:pre-wrap;font-size:0.875rem;line-height:1.6;margin:1.5rem 0 0;">' + escapeHtml(direccion1) + '</p>'
+              ? '<div style="margin-top:1.5rem;">' + dir1LabelHtml2 + '<div class="html-content" style="color:var(--color-primary);opacity:0.75;">' + direccion1 + '</div></div>'
               : '';
 
             var siteSlug = (site && site.slug) ? site.slug : '';
