@@ -1,4 +1,5 @@
 ---
+import { icons as lucideIcons } from "lucide";
 import type { HeaderSlide } from "../types";
 
 interface Props {
@@ -11,6 +12,26 @@ const isCarousel = config.length > 1;
 function getVimeoSrc(url: string): string | null {
   const match = url.match(/vimeo\.com\/(\d+)/);
   return match ? `https://player.vimeo.com/video/${match[1]}?autoplay=1&muted=1&loop=1&background=1` : null;
+}
+
+function getIconSvgPath(name: string | undefined): string | null {
+  if (!name) return null;
+  const iconData = (lucideIcons as Record<string, [string, Record<string, string | number>][]>)[name];
+  if (!iconData) return null;
+  return iconData.map(([tag, attrs]) => {
+    const attrStr = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ");
+    return `<${tag} ${attrStr}/>`;
+  }).join("");
+}
+
+function renderButtonContent(text: string | undefined, iconName: string | undefined): string {
+  const path = getIconSvgPath(iconName);
+  const svg = path
+    ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`
+    : null;
+  if (text && svg) return `${text}${svg}`;
+  if (svg) return svg;
+  return text ?? "";
 }
 
 const s0 = config.length === 1 ? config[0] : null;
@@ -52,13 +73,15 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
                   <div class="max-w-2xl mx-auto text-center">
                     <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{slide.title}</h1>
                     <div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content" set:html={slide.description} />
-                    {slide.text_button && slide.url_button && (
+                    {slide.url_button && (
                       <a
                         href={slide.url_button}
-                        class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
-                      >
-                        {slide.text_button}
-                      </a>
+                        class:list={[
+                          "inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors",
+                          !slide.text_button && slide.icon_button ? "justify-center" : "",
+                        ]}
+                        set:html={renderButtonContent(slide.text_button, slide.icon_button)}
+                      />
                     )}
                   </div>
                 </div>
@@ -83,13 +106,15 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
                   <div class="max-w-lg">
                     <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{slide.title}</h1>
                     <div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content" set:html={slide.description} />
-                    {slide.text_button && slide.url_button && (
+                    {slide.url_button && (
                       <a
                         href={slide.url_button}
-                        class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
-                      >
-                        {slide.text_button}
-                      </a>
+                        class:list={[
+                          "inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors",
+                          !slide.text_button && slide.icon_button ? "justify-center" : "",
+                        ]}
+                        set:html={renderButtonContent(slide.text_button, slide.icon_button)}
+                      />
                     )}
                   </div>
                 </div>
@@ -137,13 +162,15 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
           <div class="max-w-2xl mx-auto text-center">
             <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{s0.title}</h1>
             <div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content" set:html={s0.description} />
-            {s0.text_button && s0.url_button && (
+            {s0.url_button && (
               <a
                 href={s0.url_button}
-                class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
-              >
-                {s0.text_button}
-              </a>
+                class:list={[
+                  "inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors",
+                  !s0.text_button && s0.icon_button ? "justify-center" : "",
+                ]}
+                set:html={renderButtonContent(s0.text_button, s0.icon_button)}
+              />
             )}
           </div>
         </div>
@@ -169,13 +196,15 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
           <div class="max-w-lg">
             <h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">{s0.title}</h1>
             <div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content" set:html={s0.description} />
-            {s0.text_button && s0.url_button && (
+            {s0.url_button && (
               <a
                 href={s0.url_button}
-                class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors"
-              >
-                {s0.text_button}
-              </a>
+                class:list={[
+                  "inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors",
+                  !s0.text_button && s0.icon_button ? "justify-center" : "",
+                ]}
+                set:html={renderButtonContent(s0.text_button, s0.icon_button)}
+              />
             )}
           </div>
         </div>

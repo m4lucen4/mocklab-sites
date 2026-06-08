@@ -186,40 +186,42 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                       });
                     }
 
-                    var pageHtml = '';
-                    if (components) {
-                      var compIndex = 0;
-                      var pcIndex = 0;
-                      components.forEach(function (comp) {
-                        var compHtml = '';
-                        if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config);
-                        if (comp.type === 'cta') compHtml = buildCTAHtml(comp.config);
-                        if (comp.type === 'body') compHtml = buildBodyHtml(comp.config);
-                        if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
-                        if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
-                        if (comp.type === 'rich_text') compHtml = buildRichTextHtml(comp.config);
-                        if (comp.type === 'separator') compHtml = buildSeparatorHtml(comp.config);
-                        if (comp.type === 'figure') compHtml = buildFigureHtml(comp.config);
-                        if (comp.type === 'project_columns') {
-                          compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
-                          pcIndex++;
-                        }
-                        if (compHtml) {
-                          if (compIndex > 0) pageHtml += '<div style="height:2rem;"></div>';
-                          pageHtml += compHtml;
-                          compIndex++;
-                        }
-                      });
-                    }
-
-                    if (pageContent) {
-                      pageContent.innerHTML = pageHtml;
-                      preservedEls.forEach(function (el) { pageContent.appendChild(el); });
-                      var headerEl = pageContent.querySelector('[data-component="header"]');
-                      if (headerEl && headerEl.querySelectorAll('[data-slide-index]').length > 1) {
-                        initCarousel(headerEl);
+                    return preloadHeaderIcons(components).then(function() {
+                      var pageHtml = '';
+                      if (components) {
+                        var compIndex = 0;
+                        var pcIndex = 0;
+                        components.forEach(function (comp) {
+                          var compHtml = '';
+                          if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config);
+                          if (comp.type === 'cta') compHtml = buildCTAHtml(comp.config);
+                          if (comp.type === 'body') compHtml = buildBodyHtml(comp.config);
+                          if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
+                          if (comp.type === 'contact') compHtml = buildContactHtml(comp.config, site);
+                          if (comp.type === 'rich_text') compHtml = buildRichTextHtml(comp.config);
+                          if (comp.type === 'separator') compHtml = buildSeparatorHtml(comp.config);
+                          if (comp.type === 'figure') compHtml = buildFigureHtml(comp.config);
+                          if (comp.type === 'project_columns') {
+                            compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
+                            pcIndex++;
+                          }
+                          if (compHtml) {
+                            if (compIndex > 0) pageHtml += '<div style="height:2rem;"></div>';
+                            pageHtml += compHtml;
+                            compIndex++;
+                          }
+                        });
                       }
-                    }
+
+                      if (pageContent) {
+                        pageContent.innerHTML = pageHtml;
+                        preservedEls.forEach(function (el) { pageContent.appendChild(el); });
+                        var headerEl = pageContent.querySelector('[data-component="header"]');
+                        if (headerEl && headerEl.querySelectorAll('[data-slide-index]').length > 1) {
+                          initCarousel(headerEl);
+                        }
+                      }
+                    });
                   });
               });
           })
@@ -377,6 +379,54 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           return match ? 'https://player.vimeo.com/video/' + match[1] + '?autoplay=1&muted=1&loop=1&background=1' : null;
         }
 
+        var iconCache = {};
+
+        function pascalToKebab(name) {
+          return name.replace(/([A-Z])/g, function(m, _, offset) {
+            return (offset > 0 ? '-' : '') + m.toLowerCase();
+          });
+        }
+
+        function fetchLucideIcon(name) {
+          if (!name) return Promise.resolve(null);
+          if (Object.prototype.hasOwnProperty.call(iconCache, name)) return Promise.resolve(iconCache[name]);
+          var kebab = pascalToKebab(name);
+          return fetch('https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/' + kebab + '.svg')
+            .then(function(r) { return r.ok ? r.text() : null; })
+            .then(function(svg) {
+              if (!svg) { iconCache[name] = null; return null; }
+              var inner = svg.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').trim();
+              iconCache[name] = inner;
+              return inner;
+            })
+            .catch(function() { iconCache[name] = null; return null; });
+        }
+
+        function preloadHeaderIcons(components) {
+          var names = [];
+          (components || []).forEach(function(comp) {
+            if (comp.type === 'header' && Array.isArray(comp.config)) {
+              comp.config.forEach(function(slide) {
+                if (slide.icon_button && !Object.prototype.hasOwnProperty.call(iconCache, slide.icon_button)) {
+                  names.push(slide.icon_button);
+                }
+              });
+            }
+          });
+          return Promise.all(names.map(fetchLucideIcon));
+        }
+
+        function buildSlideButtonHtml(url, text, iconName) {
+          if (!url) return '';
+          var path = iconName ? iconCache[iconName] : null;
+          var svg = path
+            ? '<svg xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>'
+            : '';
+          var content = (text && svg) ? escapeHtml(text) + svg : svg ? svg : escapeHtml(text || '');
+          var justifyClass = (!text && iconName) ? ' justify-center' : '';
+          return '<a href="' + escapeAttr(url) + '" class="inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors' + justifyClass + '">' + content + '</a>';
+        }
+
         function buildHeaderHtml(config) {
           if (!config || config.length === 0) return '';
 
@@ -389,9 +439,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var isVimeo = slide.background_type === "vimeo" && !!slide.vimeo_url;
             var vimeoSrc = isVimeo ? getVimeoSrc(slide.vimeo_url) : null;
 
-            var buttonHtml = (slide.text_button && slide.url_button)
-              ? '<a href="' + escapeAttr(slide.url_button) + '" class="inline-block px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors">' + escapeHtml(slide.text_button) + '</a>'
-              : '';
+            var buttonHtml = buildSlideButtonHtml(slide.url_button, slide.text_button, slide.icon_button);
 
             var bgClass = isVimeo ? 'relative h-full overflow-hidden bg-black' : 'relative h-full bg-cover bg-center';
             var bgStyle = (isVimeo || !slide.image_url) ? '' : ' style="background-image: url(\'' + escapeAttr(slide.image_url) + '\')"';
