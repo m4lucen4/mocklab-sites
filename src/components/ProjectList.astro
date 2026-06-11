@@ -215,7 +215,9 @@ const allCategories = Array.from(
   .project-card.hidden-by-filter {
     display: none;
   }
+</style>
 
+<style is:global>
   .alt-row {
     display: grid;
     gap: 1.5rem;
@@ -248,6 +250,12 @@ const allCategories = Array.from(
 
   const activeFilters = new Set<string>();
   let currentView: "grid" | "list" = "grid";
+
+  // Capture all alt-grid cards once at init so we can rebuild rows after filtering
+  const isAltGrid = viewGrid.querySelector(".project-card[data-group]") !== null;
+  const allAltCards: HTMLElement[] = isAltGrid
+    ? Array.from(viewGrid.querySelectorAll<HTMLElement>(".project-card[data-group]"))
+    : [];
 
   // --- View toggle ---
   function setView(view: "grid" | "list") {
@@ -297,27 +305,72 @@ const allCategories = Array.from(
   const ro = new ResizeObserver(syncAltHeights);
   ro.observe(viewGrid);
 
+  // --- Rebuild alt-grid rows with only the visible cards ---
+  function rebuildAltGrid() {
+    const altContainer = viewGrid.querySelector<HTMLElement>(".flex.flex-col.gap-6");
+    if (!altContainer) return;
+
+    const visibleCards = activeFilters.size === 0
+      ? allAltCards
+      : allAltCards.filter((card) => activeFilters.has(card.dataset.category ?? ""));
+
+    altContainer.innerHTML = "";
+
+    for (let i = 0; i < visibleCards.length; i += 3) {
+      const group = visibleCards.slice(i, i + 3);
+      const groupIndex = Math.floor(i / 3);
+      const isEven = groupIndex % 2 === 0;
+
+      const row = document.createElement("div");
+      row.className = `alt-row ${isEven ? "alt-row-even" : "alt-row-odd"}`;
+
+      group.forEach((card, posInGroup) => {
+        const isLarge = isEven ? posInGroup === 2 : posInGroup === 0;
+        const imgEl = card.querySelector<HTMLElement>(".alt-img");
+
+        if (imgEl) {
+          imgEl.classList.toggle("aspect-[5/7]", !isLarge);
+          imgEl.classList.toggle("aspect-[10/7]", isLarge);
+        }
+
+        card.classList.toggle("alt-large", isLarge);
+        if (isLarge) {
+          card.dataset.large = "";
+        } else {
+          delete card.dataset.large;
+        }
+        card.dataset.group = String(groupIndex);
+
+        row.appendChild(card);
+      });
+
+      altContainer.appendChild(row);
+    }
+  }
+
   // --- Filter ---
   function applyFilters() {
-    const container = currentView === "grid" ? viewGrid : viewList;
-    container.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
+    // List view always uses hidden-by-filter
+    viewList.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
       if (activeFilters.size === 0) {
         card.classList.remove("hidden-by-filter");
-        return;
+      } else {
+        card.classList.toggle("hidden-by-filter", !activeFilters.has(card.dataset.category ?? ""));
       }
-      const cardCategory = card.dataset.category ?? "";
-      card.classList.toggle("hidden-by-filter", !activeFilters.has(cardCategory));
     });
-    // Keep the other view in sync too
-    const other = currentView === "grid" ? viewList : viewGrid;
-    other.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
-      if (activeFilters.size === 0) {
-        card.classList.remove("hidden-by-filter");
-        return;
-      }
-      const cardCategory = card.dataset.category ?? "";
-      card.classList.toggle("hidden-by-filter", !activeFilters.has(cardCategory));
-    });
+
+    // Alt-grid rebuilds rows; regular grid toggles visibility
+    if (isAltGrid) {
+      rebuildAltGrid();
+    } else {
+      viewGrid.querySelectorAll<HTMLElement>(".project-card").forEach((card) => {
+        if (activeFilters.size === 0) {
+          card.classList.remove("hidden-by-filter");
+        } else {
+          card.classList.toggle("hidden-by-filter", !activeFilters.has(card.dataset.category ?? ""));
+        }
+      });
+    }
   }
 
   function addPill(category: string) {

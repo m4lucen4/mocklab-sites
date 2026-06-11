@@ -65,6 +65,9 @@ export interface BodyConfig {
   image_1?: string;
   image_2?: string;
   image_3?: string;
+  link_1?: string;
+  link_2?: string;
+  link_3?: string;
   type: 1 | 2 | 3 | 4 | 5;
 }
 

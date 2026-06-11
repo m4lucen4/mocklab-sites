@@ -6,49 +6,58 @@ interface Props {
 }
 
 const { config } = Astro.props;
-const { description, image_1, image_2, image_3, type } = config;
+const { description, image_1, image_2, image_3, link_1, link_2, link_3, type } = config;
 
 const imgStyle = "width: 100%; height: 100%; object-fit: cover; display: block;";
 const descStyle = "align-self: end; padding: 2rem 2.5rem; color: var(--color-primary);";
+
+function wrapWithLink(imgHtml: string, link?: string) {
+  if (!link) return imgHtml;
+  const isInternal = link.startsWith("/");
+  if (isInternal) {
+    return `<a href="${link}" style="display:block;width:100%;height:100%;cursor:pointer;">${imgHtml}</a>`;
+  }
+  return `<a href="${link}" target="_blank" rel="noopener noreferrer" style="display:block;width:100%;height:100%;cursor:pointer;">${imgHtml}</a>`;
+}
 ---
 
 
 {type === 1 && (
   <section data-component="body" class="body-grid body-grid-1">
-    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
+    <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 2 && (
   <section data-component="body" class="body-grid body-grid-2">
-    <div class="img-wrapper-wide">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper-wide">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 3 && (
   <section data-component="body" class="body-grid body-grid-3">
-    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
+    <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
+    <div class="img-wrapper">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 4 && (
   <section data-component="body" class="body-grid body-grid-4">
-    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper-wide">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
+    <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
+    <div class="img-wrapper-wide">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
   </section>
 )}
 
 {type === 5 && (
   <section data-component="body" class="body-grid body-grid-5">
-    <div class="img-wrapper">{image_1 && <img src={image_1} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_2 && <img src={image_2} alt="" style={imgStyle} />}</div>
-    <div class="img-wrapper">{image_3 && <img src={image_3} alt="" style={imgStyle} />}</div>
+    <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
+    <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
+    <div class="img-wrapper">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
   </section>
 )}
