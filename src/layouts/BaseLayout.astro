@@ -263,7 +263,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         function buildLogoHtml(site, siteSlug) {
           var inner = site.logo_url
-            ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-8 w-auto">'
+            ? '<img src="' + escapeAttr(site.logo_url) + '" alt="' + escapeAttr(site.studio_name) + '" class="h-6 w-auto">'
             : '<span class="text-base font-semibold tracking-widest" style="color:var(--color-tertiary);">' + escapeHtml(site.studio_name) + '</span>';
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
@@ -612,7 +612,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             inner = imgCell(config.image_1, config.link_1) + imgCell(config.image_2, config.link_2) + imgCell(config.image_3, config.link_3);
           }
 
-          return '<section data-component="body" class="body-grid body-grid-' + type + '">' + inner + '</section>';
+          return '<section data-component="body" class="body-grid body-grid-' + type + ' px-6 md:px-16">' + inner + '</section>';
         }
 
         function buildContentHtml(config) {
@@ -708,7 +708,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           var isStretch = hAlign === 'stretch';
           var hClass = hMap[hAlign] || 'justify-between';
 
-          var sectionClass = isStretch ? 'py-8 px-0 md:px-32' : 'py-8 px-0 md:px-10';
+          var sectionClass = isStretch ? 'py-8 px-6 md:px-32' : 'py-8 px-6 md:px-10';
           var gapClass = isStretch ? 'gap-16' : 'gap-8';
 
           var p1 = preloadedProjects[0] || null;
@@ -738,10 +738,10 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
           if (columns === 1) {
             if (!p1) return '';
-            var widthStyleMap = { full: 'width:100%;', '80': 'max-width:80%;margin:0 auto;', '50': 'max-width:50%;margin:0 auto;' };
-            var col1WidthStyle = widthStyleMap[config.width_1col || 'full'] || 'width:100%;';
-            return '<section data-component="project_columns" class="py-8 px-0 md:px-10">' +
-              '<div style="' + col1WidthStyle + '">' +
+            var col1WidthClass = { full: 'w-full', '80': 'w-full md:max-w-[80%] md:mx-auto', '50': 'w-full md:max-w-[50%] md:mx-auto' };
+            var col1Class = col1WidthClass[config.width_1col || 'full'] || 'w-full';
+            return '<section data-component="project_columns" class="py-8 px-6 md:px-10">' +
+              '<div class="' + col1Class + '">' +
                 cardHtml(p1, v1Class, '') +
               '</div>' +
             '</section>';

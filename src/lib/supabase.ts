@@ -43,6 +43,17 @@ export async function getSitePages(siteId: string): Promise<SitePage[]> {
   return data as SitePage[];
 }
 
+export async function getAllSitePages(siteId: string): Promise<SitePage[]> {
+  const { data, error } = await supabase
+    .from("site_pages")
+    .select("*")
+    .eq("site_id", siteId)
+    .order("position", { ascending: true });
+
+  if (error) throw new Error(`Error fetching pages: ${error.message}`);
+  return data as SitePage[];
+}
+
 export async function getPageComponents(pageId: string): Promise<SiteComponent[]> {
   const { data, error } = await supabase
     .from("site_components")

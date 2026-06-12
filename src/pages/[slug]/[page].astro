@@ -1,5 +1,5 @@
 ---
-import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
+import { getSiteBySlug, getSitePages, getAllSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
 import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
@@ -21,7 +21,8 @@ if (!site) {
 }
 
 const pages = await getSitePages(site.id);
-const currentPage = pages.find((p) => p.slug === pageSlug);
+const allPages = await getAllSitePages(site.id);
+const currentPage = allPages.find((p) => p.slug === pageSlug);
 
 if (!currentPage) {
   return Astro.redirect('/404');

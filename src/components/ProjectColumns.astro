@@ -18,12 +18,12 @@ const {
   width_1col = "full",
 } = config;
 
-const widthStyleMap: Record<string, string> = {
-  full: "width: 100%;",
-  "80": "max-width: 80%; margin: 0 auto;",
-  "50": "max-width: 50%; margin: 0 auto;",
+const col1WidthClass: Record<string, string> = {
+  full: "w-full",
+  "80": "w-full md:max-w-[80%] md:mx-auto",
+  "50": "w-full md:max-w-[50%] md:mx-auto",
 };
-const col1WidthStyle = widthStyleMap[width_1col] ?? "width: 100%;";
+const col1Class = col1WidthClass[width_1col] ?? "w-full";
 
 const p1 = project_1 ? projects.find((p) => String(p.id) === String(project_1)) : undefined;
 const p2 = project_2 ? projects.find((p) => String(p.id) === String(project_2)) : undefined;
@@ -36,7 +36,7 @@ const v2Class = vMap[vertical_align_2] ?? "justify-start";
 const isStretch = horizontal_align === "stretch";
 const hClass = hMap[horizontal_align] ?? "justify-between";
 
-const sectionClass = isStretch ? "py-8 px-0 md:px-32" : "py-8 px-0 md:px-10";
+const sectionClass = isStretch ? "py-8 px-6 md:px-32" : "py-8 px-6 md:px-10";
 const gapClass = isStretch ? "gap-16" : "gap-8";
 
 const imgStyle = "width: 100%; height: auto; display: block;";
@@ -49,8 +49,8 @@ const pcProjects = JSON.stringify([
 ---
 
 {columns === 1 && p1 && (
-  <section data-component="project_columns" data-projects={pcProjects} class="py-8 px-0 md:px-10">
-    <div style={col1WidthStyle}>
+  <section data-component="project_columns" data-projects={pcProjects} class="py-8 px-6 md:px-10">
+    <div class={col1Class}>
       <a href={`/${siteSlug}/proyectos/${p1.id}`} class={`group flex flex-col ${v1Class}`} style="text-decoration: none; color: inherit;">
         <div style="overflow: hidden;">
           {p1.image_data?.[0]?.url

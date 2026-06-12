@@ -23,7 +23,7 @@ function wrapWithLink(imgHtml: string, link?: string) {
 
 
 {type === 1 && (
-  <section data-component="body" class="body-grid body-grid-1">
+  <section data-component="body" class="body-grid body-grid-1 px-6 md:px-16">
     <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
@@ -31,14 +31,14 @@ function wrapWithLink(imgHtml: string, link?: string) {
 )}
 
 {type === 2 && (
-  <section data-component="body" class="body-grid body-grid-2">
+  <section data-component="body" class="body-grid body-grid-2 px-6 md:px-16">
     <div class="img-wrapper-wide">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div style={descStyle}><div class="html-content" style="margin: 0; line-height: 1.6;" set:html={description} /></div>
   </section>
 )}
 
 {type === 3 && (
-  <section data-component="body" class="body-grid body-grid-3">
+  <section data-component="body" class="body-grid body-grid-3 px-6 md:px-16">
     <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
     <div class="img-wrapper">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
@@ -47,7 +47,7 @@ function wrapWithLink(imgHtml: string, link?: string) {
 )}
 
 {type === 4 && (
-  <section data-component="body" class="body-grid body-grid-4">
+  <section data-component="body" class="body-grid body-grid-4 px-6 md:px-16">
     <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
     <div class="img-wrapper-wide">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
@@ -55,7 +55,7 @@ function wrapWithLink(imgHtml: string, link?: string) {
 )}
 
 {type === 5 && (
-  <section data-component="body" class="body-grid body-grid-5">
+  <section data-component="body" class="body-grid body-grid-5 px-6 md:px-16">
     <div class="img-wrapper">{image_1 && <Fragment set:html={wrapWithLink(`<img src="${image_1}" alt="" style="${imgStyle}" />`, link_1)} />}</div>
     <div class="img-wrapper">{image_2 && <Fragment set:html={wrapWithLink(`<img src="${image_2}" alt="" style="${imgStyle}" />`, link_2)} />}</div>
     <div class="img-wrapper">{image_3 && <Fragment set:html={wrapWithLink(`<img src="${image_3}" alt="" style="${imgStyle}" />`, link_3)} />}</div>
