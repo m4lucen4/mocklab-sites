@@ -19,6 +19,8 @@ export interface Site {
   tertiary_color?: string | null;
   full_width?: boolean;
   navbar_transparent?: boolean;
+  default_language?: "es" | "en";
+  multilanguage?: boolean;
   published: boolean;
   created_at: string;
   updated_at: string;

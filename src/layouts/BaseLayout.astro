@@ -28,7 +28,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 ---
 
 <!doctype html>
-<html lang="en" data-slug={site.slug} data-page-slug={currentPageSlug} style={cssVars}>
+<html lang={site.default_language || 'en'} data-slug={site.slug} data-page-slug={currentPageSlug} style={cssVars}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -81,7 +81,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width,default_language,multilanguage";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -129,6 +129,22 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               root.setProperty("--title-font", FONT_ALIASES[site.font] || site.font || "Inter");
             }
 
+            // ─── Language setup ───────────────────────────────────────────────
+            var siteLang = site.default_language || 'en';
+            var multilanguage = !!site.multilanguage;
+            var activeLang;
+            try {
+              activeLang = multilanguage ? (localStorage.getItem('site_language') || siteLang) : siteLang;
+            } catch (e) {
+              activeLang = siteLang;
+            }
+            window.__siteLang = activeLang;
+            window.__siteMultilanguage = multilanguage;
+            window.__siteSite = site;
+            window.__siteSlug = slug;
+
+            applyTranslations(activeLang);
+
             // Fetch all visible pages in one request
             var pagesUrl = baseUrl + "site_pages?site_id=eq." + site.id +
               "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav,content";
@@ -140,11 +156,13 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
                 // Re-render navigation with fresh data
                 var navPages = pages.filter(function (p) { return p.show_in_nav; });
-                renderNavigation(site, navPages, slug, pageSlug || "home");
+                window.__siteNavPages = navPages;
+                renderNavigation(site, navPages, slug, pageSlug || "home", activeLang);
 
                 // Update footer with fresh data
                 var footerYear = document.querySelector('[data-footer-year]');
                 if (footerYear) footerYear.textContent = String(new Date().getFullYear());
+                updateFooterLang(activeLang);
 
                 var footerWrap = document.querySelector('[data-footer-logo-wrap]');
                 if (footerWrap) {
@@ -166,7 +184,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
                 // Special page: render legal content directly, skip components fetch
                 if (currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies") {
-                  var LEGAL_TITLES = { "aviso-legal": "Legal Notice", "politica-cookies": "Cookie Policy" };
+                  var LEGAL_TITLES = { "aviso-legal": t('legal_aviso', activeLang), "politica-cookies": t('legal_cookies', activeLang) };
                   var pageContent = document.getElementById('page-content');
                   if (pageContent) {
                     var legalTitle = LEGAL_TITLES[currentPage.slug] || currentPage.title;
@@ -241,6 +259,86 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             document.body.classList.add("styles-ready");
           });
 
+        // ─── Translations ────────────────────────────────────────────────────
+        var TRANSLATIONS = {
+          en: {
+            nav_home: 'Home', nav_projects: 'Projects',
+            contact_name: 'Name *', contact_company: 'Company', contact_email: 'Email *', contact_message: 'Message',
+            contact_privacy_text: 'I have read and accept the', contact_privacy_link: 'privacy policy',
+            contact_submit: 'Send message', contact_success: 'Message sent successfully!',
+            contact_error: 'An error occurred. Please try again.',
+            footer_legal: 'Legal Notice', footer_cookies: 'Cookie Policy', footer_manage: 'Manage cookies',
+            legal_aviso: 'Legal Notice', legal_cookies: 'Cookie Policy',
+            cookie_banner_desc: 'We use our own and third-party cookies to improve your experience, analyze traffic, and show you relevant content. You can accept, reject, or customize your preferences.',
+            cookie_policy_link: 'Cookie policy', cookie_reject: 'Reject all', cookie_customize: 'Customize', cookie_accept: 'Accept all',
+            cookie_modal_title: 'Cookie settings',
+            cookie_modal_desc: 'Select which cookie categories you want to allow. Necessary cookies are always on because the site cannot function properly without them.',
+            cookie_necessary: 'Necessary', cookie_always_on: 'Always on',
+            cookie_necessary_desc: 'Essential for the basic functioning of the site. Cannot be disabled.',
+            cookie_analytics: 'Analytics',
+            cookie_analytics_desc: 'They help us understand how you interact with the site, which pages you visit, and how you arrived. Data is anonymous.',
+            cookie_marketing: 'Marketing',
+            cookie_marketing_desc: 'They allow us to show you ads and personalized content based on your interests, inside and outside the site.',
+            cookie_cancel: 'Cancel', cookie_save: 'Save preferences',
+          },
+          es: {
+            nav_home: 'Inicio', nav_projects: 'Proyectos',
+            contact_name: 'Nombre *', contact_company: 'Empresa', contact_email: 'Email *', contact_message: 'Mensaje',
+            contact_privacy_text: 'He leído y acepto la', contact_privacy_link: 'política de privacidad',
+            contact_submit: 'Enviar mensaje', contact_success: '¡Mensaje enviado correctamente!',
+            contact_error: 'Ha ocurrido un error. Por favor, inténtalo de nuevo.',
+            footer_legal: 'Aviso legal', footer_cookies: 'Política de cookies', footer_manage: 'Gestionar cookies',
+            legal_aviso: 'Aviso Legal', legal_cookies: 'Política de Cookies',
+            cookie_banner_desc: 'Usamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y mostrarte contenido relevante. Puedes aceptar, rechazar o personalizar tus preferencias.',
+            cookie_policy_link: 'Política de cookies', cookie_reject: 'Rechazar todo', cookie_customize: 'Personalizar', cookie_accept: 'Aceptar todo',
+            cookie_modal_title: 'Configuración de cookies',
+            cookie_modal_desc: 'Selecciona qué categorías de cookies quieres permitir. Las cookies necesarias siempre están activas porque el sitio no puede funcionar correctamente sin ellas.',
+            cookie_necessary: 'Necesarias', cookie_always_on: 'Siempre activo',
+            cookie_necessary_desc: 'Esenciales para el funcionamiento básico del sitio. No pueden desactivarse.',
+            cookie_analytics: 'Analíticas',
+            cookie_analytics_desc: 'Nos ayudan a entender cómo interactúas con el sitio, qué páginas visitas y cómo llegaste. Los datos son anónimos.',
+            cookie_marketing: 'Marketing',
+            cookie_marketing_desc: 'Nos permiten mostrarte anuncios y contenido personalizado según tus intereses, dentro y fuera del sitio.',
+            cookie_cancel: 'Cancelar', cookie_save: 'Guardar preferencias',
+          }
+        };
+
+        function t(key, lang) {
+          var l = lang || window.__siteLang || 'en';
+          var dict = TRANSLATIONS[l] || TRANSLATIONS['en'];
+          return (dict && dict[key] !== undefined ? dict[key] : (TRANSLATIONS['en'][key] || key));
+        }
+
+        function applyTranslations(lang) {
+          window.__siteLang = lang;
+          document.documentElement.lang = lang;
+          document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            el.textContent = t(el.getAttribute('data-i18n'), lang);
+          });
+          var legalEl = document.querySelector('[data-footer-legal="aviso-legal"]');
+          if (legalEl) legalEl.textContent = t('footer_legal', lang);
+          var cookiesEl = document.querySelector('[data-footer-legal="politica-cookies"]');
+          if (cookiesEl) cookiesEl.textContent = t('footer_cookies', lang);
+          var manageEl = document.querySelector('[data-cookie-settings]');
+          if (manageEl) manageEl.textContent = t('footer_manage', lang);
+          document.querySelectorAll('[data-lang-btn]').forEach(function(btn) {
+            var l = btn.getAttribute('data-lang-btn');
+            var isActive = l === lang;
+            btn.style.backgroundColor = isActive ? 'var(--color-primary)' : 'transparent';
+            btn.style.color = isActive ? '#ffffff' : 'var(--color-tertiary)';
+            btn.style.opacity = isActive ? '1' : '0.5';
+          });
+        }
+
+        function updateFooterLang(lang) {
+          var legalEl = document.querySelector('[data-footer-legal="aviso-legal"]');
+          if (legalEl) legalEl.textContent = t('footer_legal', lang);
+          var cookiesEl = document.querySelector('[data-footer-legal="politica-cookies"]');
+          if (cookiesEl) cookiesEl.textContent = t('footer_cookies', lang);
+          var manageEl = document.querySelector('[data-cookie-settings]');
+          if (manageEl) manageEl.textContent = t('footer_manage', lang);
+        }
+
         // ─── SVG icons ───────────────────────────────────────────────────────
         var SVG_INSTAGRAM = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>';
         var SVG_FACEBOOK = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>';
@@ -268,27 +366,39 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           return '<a href="/' + escapeAttr(siteSlug) + '/" class="flex items-center">' + inner + '</a>';
         }
 
-        var NAV_TITLES = { home: "Home", proyectos: "Projects" };
+        function buildLangSelectorHtml(activeLang) {
+          if (!window.__siteMultilanguage) return '';
+          return '<div class="flex items-center gap-0.5">' +
+            ['es', 'en'].map(function(l) {
+              var isActive = l === activeLang;
+              return '<button data-lang-btn="' + l + '" class="text-xs font-semibold tracking-wider px-2 py-0.5 rounded border-none cursor-pointer transition-all" style="' +
+                (isActive ? 'background-color:var(--color-primary);color:#ffffff;' : 'background:transparent;color:var(--color-tertiary);opacity:0.5;') + '">' +
+                l.toUpperCase() + '</button>';
+            }).join('') +
+          '</div>';
+        }
 
-        function buildMenuHtml(navPages, siteSlug, currentPageSlug) {
+        function buildMenuHtml(navPages, siteSlug, currentPageSlug, lang) {
+          var navTitles = { home: t('nav_home', lang), proyectos: t('nav_projects', lang) };
           var links = navPages.map(function (p) {
             var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
             var cls = p.slug === currentPageSlug
               ? "text-base tracking-wide transition-opacity font-semibold opacity-100"
               : "text-base tracking-wide transition-opacity opacity-60 hover:opacity-100";
-            var label = NAV_TITLES[p.slug] || p.title;
+            var label = navTitles[p.slug] || p.title;
             return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a></li>';
           }).join("");
           return '<ul class="hidden md:flex items-center gap-8 flex-1">' + links + '</ul>';
         }
 
-        function buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site) {
+        function buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site, lang) {
+          var navTitles = { home: t('nav_home', lang), proyectos: t('nav_projects', lang) };
           var links = navPages.map(function (p) {
             var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
             var cls = p.slug === currentPageSlug
               ? "text-base tracking-wide font-semibold opacity-100"
               : "text-base tracking-wide opacity-60";
-            var label = NAV_TITLES[p.slug] || p.title;
+            var label = navTitles[p.slug] || p.title;
             return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a>';
           }).join("");
 
@@ -297,46 +407,60 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             ? '<div class="flex items-center gap-4 pt-4" style="border-top:1px solid var(--color-secondary);opacity:0.4;">' + socials + '</div>'
             : "";
 
+          var langRow = window.__siteMultilanguage
+            ? '<div class="flex items-center gap-1 pt-2">' +
+                ['es', 'en'].map(function(l) {
+                  var isActive = l === lang;
+                  return '<button data-lang-btn="' + l + '" class="text-xs font-semibold tracking-wider px-3 py-1 rounded border-none cursor-pointer transition-all" style="' +
+                    (isActive ? 'background-color:var(--color-primary);color:#ffffff;' : 'background:transparent;color:var(--color-tertiary);opacity:0.5;') + '">' +
+                    l.toUpperCase() + '</button>';
+                }).join('') +
+              '</div>'
+            : '';
+
           return '<div id="mobile-menu" class="hidden absolute top-16 left-0 right-0 z-40 px-6 py-6 flex-col gap-4 md:hidden"' +
             ' style="background-color:var(--color-secondary);">' +
-            links + socialsRow + '</div>';
+            links + socialsRow + langRow + '</div>';
         }
 
         function buildHamburgerHtml(site) {
           return '<button id="menu-toggle" class="md:hidden ml-auto" aria-label="Open menu" style="color:var(--color-tertiary);">' + SVG_HAMBURGER + '</button>';
         }
 
-        function renderNavigation(site, navPages, siteSlug, currentPageSlug) {
+        function renderNavigation(site, navPages, siteSlug, currentPageSlug, lang) {
           var nav = document.querySelector('[data-component="navigation"]');
           if (!nav) return;
 
           var navType = site.navbar_type || 1;
           var socialsHtml = buildSocialsHtml(site);
+          var langSelectorHtml = buildLangSelectorHtml(lang);
           var logoHtml = buildLogoHtml(site, siteSlug);
-          var menuHtml = buildMenuHtml(navPages, siteSlug, currentPageSlug);
+          var menuHtml = buildMenuHtml(navPages, siteSlug, currentPageSlug, lang);
           var hamburgerHtml = buildHamburgerHtml(site);
-          var mobileHtml = buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site);
+          var mobileHtml = buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site, lang);
+
+          var rightContent = socialsHtml + langSelectorHtml;
 
           var innerHtml;
           if (navType === 1) {
-            // Menu | Logo | Socials
+            // Menu | Logo | Socials + Lang
             innerHtml =
               '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:var(--site-max-width,1400px);margin:0 auto;">' +
                 menuHtml +
                 '<div class="flex items-center justify-center flex-1 md:absolute md:left-1/2 md:-translate-x-1/2">' + logoHtml + '</div>' +
-                (socialsHtml
-                  ? '<div class="hidden md:flex items-center gap-4 flex-1 justify-end">' + socialsHtml + '</div>'
+                (rightContent
+                  ? '<div class="hidden md:flex items-center gap-4 flex-1 justify-end">' + rightContent + '</div>'
                   : '<div class="flex-1"></div>') +
                 hamburgerHtml +
               '</div>';
           } else {
-            // Logo | Menu | Socials
+            // Logo | Menu | Socials + Lang
             innerHtml =
               '<div class="px-6 md:px-16 h-full flex items-center" style="max-width:var(--site-max-width,1400px);margin:0 auto;">' +
                 '<div class="shrink-0 mr-12">' + logoHtml + '</div>' +
                 menuHtml +
-                (socialsHtml
-                  ? '<div class="hidden md:flex items-center gap-4 ml-auto">' + socialsHtml + '</div>'
+                (rightContent
+                  ? '<div class="hidden md:flex items-center gap-4 ml-auto">' + rightContent + '</div>'
                   : '') +
                 hamburgerHtml +
               '</div>';
@@ -862,30 +986,33 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var siteSlug = (site && site.slug) ? site.slug : '';
             var avisoLegalHref = siteSlug ? '/' + escapeAttr(siteSlug) + '/aviso-legal' : '/aviso-legal';
 
+            var lang = window.__siteLang || 'en';
             var formHtml =
               '<form data-contact-form class="flex flex-col gap-4">' +
                 '<div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">' +
                   '<input type="text" name="website" tabindex="-1" autocomplete="off" />' +
                 '</div>' +
-                '<div><label style="' + labelStyle + '">Name *</label>' +
+                '<div><label data-i18n="contact_name" style="' + labelStyle + '">' + t('contact_name', lang) + '</label>' +
                   '<input type="text" name="nombre" required style="' + inputStyle + '" /></div>' +
-                '<div><label style="' + labelStyle + '">Company</label>' +
+                '<div><label data-i18n="contact_company" style="' + labelStyle + '">' + t('contact_company', lang) + '</label>' +
                   '<input type="text" name="compania" style="' + inputStyle + '" /></div>' +
-                '<div><label style="' + labelStyle + '">Email *</label>' +
+                '<div><label data-i18n="contact_email" style="' + labelStyle + '">' + t('contact_email', lang) + '</label>' +
                   '<input type="email" name="email" required style="' + inputStyle + '" /></div>' +
-                '<div><label style="' + labelStyle + '">Message</label>' +
+                '<div><label data-i18n="contact_message" style="' + labelStyle + '">' + t('contact_message', lang) + '</label>' +
                   '<textarea name="mensaje" rows="4" style="' + inputStyle + 'resize:none;"></textarea></div>' +
                 '<div style="display:flex;align-items:flex-start;gap:0.625rem;">' +
                   '<input type="checkbox" name="privacidad" id="contact-privacidad" required style="margin-top:0.2rem;accent-color:var(--color-primary);flex-shrink:0;width:1rem;height:1rem;cursor:pointer;" />' +
                   '<label for="contact-privacidad" style="font-size:0.8125rem;line-height:1.5;color:var(--color-primary);opacity:0.75;cursor:pointer;">' +
-                    'I have read and accept the ' +
-                    '<a href="' + avisoLegalHref + '" style="color:var(--color-primary);text-decoration:underline;opacity:1;">privacy policy</a>' +
+                    '<span data-i18n="contact_privacy_text">' + t('contact_privacy_text', lang) + '</span>' +
+                    ' <a href="' + avisoLegalHref + '" style="color:var(--color-primary);text-decoration:underline;opacity:1;">' +
+                      '<span data-i18n="contact_privacy_link">' + t('contact_privacy_link', lang) + '</span>' +
+                    '</a>' +
                   '</label>' +
                 '</div>' +
                 '<div class="flex items-center gap-4">' +
-                  '<button type="submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">Send message</button>' +
-                  '<span data-contact-success style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">Message sent successfully!</span>' +
-                  '<span data-contact-error style="display:none;font-size:0.875rem;color:#e53e3e;">An error occurred. Please try again.</span>' +
+                  '<button type="submit" data-i18n="contact_submit" class="self-start px-8 py-3 text-sm font-semibold rounded-full transition-opacity hover:opacity-80" style="background-color:var(--color-primary);color:#ffffff;">' + t('contact_submit', lang) + '</button>' +
+                  '<span data-contact-success data-i18n="contact_success" style="display:none;font-size:0.875rem;color:var(--color-primary);opacity:0.75;">' + t('contact_success', lang) + '</span>' +
+                  '<span data-contact-error data-i18n="contact_error" style="display:none;font-size:0.875rem;color:#e53e3e;">' + t('contact_error', lang) + '</span>' +
                 '</div>' +
               '</form>';
 
@@ -1084,6 +1211,21 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             if (e.key === 'ArrowRight') show(idx + 1);
           });
         }
+
+        // ─── Language switcher ────────────────────────────────────────────────
+        document.addEventListener('click', function(e) {
+          var btn = e.target.closest('[data-lang-btn]');
+          if (!btn || !window.__siteMultilanguage) return;
+          var newLang = btn.getAttribute('data-lang-btn');
+          if (!newLang || newLang === window.__siteLang) return;
+          try { localStorage.setItem('site_language', newLang); } catch (ex) {}
+          window.__siteLang = newLang;
+          var pageSlug = document.documentElement.getAttribute('data-page-slug') || 'home';
+          if (window.__siteSite && window.__siteNavPages) {
+            renderNavigation(window.__siteSite, window.__siteNavPages, window.__siteSlug, pageSlug, newLang);
+          }
+          applyTranslations(newLang);
+        });
 
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', initLightbox);

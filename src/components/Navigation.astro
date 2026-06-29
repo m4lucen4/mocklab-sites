@@ -11,7 +11,10 @@ interface Props {
 const { site, pages, siteSlug, currentPageSlug = "home" } = Astro.props;
 const navPages = pages.filter((p) => p.show_in_nav);
 
-const NAV_TITLES: Record<string, string> = { home: "Home", proyectos: "Projects" };
+const lang = (site.default_language || "en") as "es" | "en";
+const NAV_TITLES: Record<string, string> = lang === "es"
+  ? { home: "Inicio", proyectos: "Proyectos" }
+  : { home: "Home", proyectos: "Projects" };
 const navType = site.navbar_type ?? 1;
 
 const socials = [
@@ -61,7 +64,7 @@ const socials = [
           )}
         </a>
 
-        <!-- Socials (right) -->
+        <!-- Socials + Lang selector (right) -->
         <div class="hidden md:flex items-center gap-4 flex-1 justify-end">
           {socials.map((s) => (
             <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
@@ -87,6 +90,21 @@ const socials = [
               )}
             </a>
           ))}
+          {site.multilanguage && (
+            <div class="flex items-center gap-0.5">
+              {(["es", "en"] as const).map((l) => (
+                <button
+                  data-lang-btn={l}
+                  class="text-xs font-semibold tracking-wider px-2 py-0.5 rounded border-none cursor-pointer transition-all"
+                  style={l === lang
+                    ? "background-color:var(--color-primary);color:#ffffff;"
+                    : "background:transparent;color:var(--color-tertiary);opacity:0.5;"}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <!-- Mobile hamburger -->
@@ -129,7 +147,7 @@ const socials = [
           })}
         </ul>
 
-        <!-- Socials (right) -->
+        <!-- Socials + Lang selector (right) -->
         <div class="hidden md:flex items-center gap-4 ml-auto">
           {socials.map((s) => (
             <a href={s.url!} target="_blank" rel="noopener noreferrer" aria-label={s.label}
@@ -155,6 +173,21 @@ const socials = [
               )}
             </a>
           ))}
+          {site.multilanguage && (
+            <div class="flex items-center gap-0.5">
+              {(["es", "en"] as const).map((l) => (
+                <button
+                  data-lang-btn={l}
+                  class="text-xs font-semibold tracking-wider px-2 py-0.5 rounded border-none cursor-pointer transition-all"
+                  style={l === lang
+                    ? "background-color:var(--color-primary);color:#ffffff;"
+                    : "background:transparent;color:var(--color-tertiary);opacity:0.5;"}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <!-- Mobile hamburger -->
@@ -211,6 +244,21 @@ const socials = [
               </svg>
             )}
           </a>
+        ))}
+      </div>
+    )}
+    {site.multilanguage && (
+      <div class="flex items-center gap-1 pt-2">
+        {(["es", "en"] as const).map((l) => (
+          <button
+            data-lang-btn={l}
+            class="text-xs font-semibold tracking-wider px-3 py-1 rounded border-none cursor-pointer transition-all"
+            style={l === lang
+              ? "background-color:var(--color-primary);color:#ffffff;"
+              : "background:transparent;color:var(--color-tertiary);opacity:0.5;"}
+          >
+            {l.toUpperCase()}
+          </button>
         ))}
       </div>
     )}
