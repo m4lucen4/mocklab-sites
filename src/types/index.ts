@@ -20,6 +20,7 @@ export interface Site {
   full_width?: boolean;
   navbar_transparent?: boolean;
   navbar_hidden?: boolean;
+  footer_hidden?: boolean;
   default_language?: "es" | "en";
   multilanguage?: boolean;
   published: boolean;

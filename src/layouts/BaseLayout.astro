@@ -82,7 +82,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,navbar_hidden,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width,default_language,multilanguage";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,navbar_hidden,footer_hidden,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width,default_language,multilanguage";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -109,6 +109,10 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             if (site.navbar_hidden) {
               var navToRemove = document.querySelector('[data-component="navigation"]');
               if (navToRemove) navToRemove.remove();
+            }
+            if (site.footer_hidden) {
+              var footerToRemove = document.querySelector('[data-component="footer"]');
+              if (footerToRemove) footerToRemove.remove();
             }
 
             var FONT_ALIASES = { "Franklin Gothic Book": "Libre Franklin" };
@@ -959,6 +963,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             ? '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(titulo) + '</h2>'
             : '';
 
+          var showLogo = !!(config.show_logo && site && site.logo_url);
+          var logoHtml = showLogo
+            ? '<img src="' + escapeAttr(site.logo_url) + '" alt="" class="h-5 md:h-7 w-auto mb-4" />'
+            : '';
+
           var descripcionHtml = descripcion
             ? '<div class="text-base leading-relaxed html-content" style="color:var(--color-primary);opacity:0.75;">' + descripcion + '</div>'
             : '';
@@ -989,11 +998,18 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               ? dir2LabelHtml + '<div class="html-content" style="color:var(--color-primary);opacity:0.75;">' + direccion2 + '</div>'
               : '';
 
+            var contentInnerHtml = antetituloHtml + logoHtml + tituloHtml + descripcionHtml + socialsRow;
+            var contentColHtml = config.columns_reverse
+              ? '<div class="w-full md:w-1/2"><div class="md:w-fit md:ml-auto">' + contentInnerHtml + '</div></div>'
+              : '<div class="w-full md:w-1/2">' + contentInnerHtml + '</div>';
+            var dir1ColHtml = '<div class="w-full md:w-1/4 self-start">' + dir1Html + '</div>';
+            var dir2ColHtml = '<div class="w-full md:w-1/4 self-start">' + dir2Html + '</div>';
+            var columnsHtml = config.columns_reverse
+              ? dir2ColHtml + dir1ColHtml + contentColHtml
+              : contentColHtml + dir1ColHtml + dir2ColHtml;
             return '<section data-component="contact" class="px-6 md:px-16 py-16 md:py-24">' +
               '<div class="flex flex-col md:flex-row gap-12 md:gap-8">' +
-                '<div class="w-full md:w-1/2">' + antetituloHtml + tituloHtml + descripcionHtml + socialsRow + '</div>' +
-                '<div class="w-full md:w-1/4 self-start">' + dir1Html + '</div>' +
-                '<div class="w-full md:w-1/4 self-start">' + dir2Html + '</div>' +
+                columnsHtml +
               '</div>' +
             '</section>';
           } else {
@@ -1037,13 +1053,18 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '</div>' +
               '</form>';
 
-            return '<section data-component="contact" class="flex flex-col md:flex-row" style="min-height:600px;">' +
-              '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20">' +
-                tituloHtml + descripcionHtml + dir1Html2 +
-              '</div>' +
-              '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20" style="background-color:' + escapeAttr(config.form_bg_color || '#ffffff') + ';">' +
+            var contentSplitHtml = '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20">' +
+                logoHtml + tituloHtml + descripcionHtml + dir1Html2 +
+              '</div>';
+            var formSplitHtml = '<div class="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 md:py-20" style="background-color:' + escapeAttr(config.form_bg_color || '#ffffff') + ';">' +
                 formHtml +
-              '</div>' +
+              '</div>';
+            var splitHtml = config.form_reverse
+              ? formSplitHtml + contentSplitHtml
+              : contentSplitHtml + formSplitHtml;
+
+            return '<section data-component="contact" class="flex flex-col md:flex-row" style="min-height:600px;">' +
+              splitHtml +
             '</section>';
           }
         }
@@ -1274,7 +1295,9 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     <main id="page-content">
       <slot />
     </main>
-    <Footer site={site} siteSlug={site.slug} />
+    {!site.footer_hidden && (
+      <Footer site={site} siteSlug={site.slug} />
+    )}
     <CookieBanner />
   </body>
 </html>
