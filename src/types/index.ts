@@ -19,6 +19,7 @@ export interface Site {
   tertiary_color?: string | null;
   full_width?: boolean;
   navbar_transparent?: boolean;
+  navbar_hidden?: boolean;
   default_language?: "es" | "en";
   multilanguage?: boolean;
   published: boolean;
@@ -49,6 +50,8 @@ export interface HeaderSlide {
   icon_button?: string;
   vimeo_url?: string;
   background_type?: "image" | "vimeo";
+  show_logo?: boolean;
+  logo_title_align?: "bottom" | "center";
 }
 
 export interface SiteComponent {

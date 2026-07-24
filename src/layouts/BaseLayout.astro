@@ -24,7 +24,8 @@ const googleFontUrl = `https://fonts.googleapis.com/css2?family=${resolvedFont.r
 const titleFontFamily = site.title_font ? (FONT_ALIASES[site.title_font] ?? site.title_font) : resolvedFont;
 const titleFontUrl = site.title_font ? `https://fonts.googleapis.com/css2?family=${titleFontFamily.replace(/ /g, "+")}:wght@400;500;600;700&display=swap` : null;
 const siteMaxWidth = site.full_width ? "none" : "1400px";
-const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --color-tertiary: ${site.tertiary_color || "#F5F5F5"}; --font-family: ${resolvedFont}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"}; --site-max-width: ${siteMaxWidth};`;
+const navbarHeight = site.navbar_hidden ? "0rem" : "4rem";
+const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${site.secondary_color}; --color-tertiary: ${site.tertiary_color || "#F5F5F5"}; --font-family: ${resolvedFont}; --title-font: ${titleFontFamily}; --background-color: ${site.background_color || "#ffffff"}; --site-max-width: ${siteMaxWidth}; --navbar-height: ${navbarHeight};`;
 ---
 
 <!doctype html>
@@ -81,7 +82,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch full site data (styles + navbar config + socials)
         var siteUrl = baseUrl + "sites?slug=eq." + encodeURIComponent(slug) +
-          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width,default_language,multilanguage";
+          "&select=id,primary_color,secondary_color,background_color,tertiary_color,font,title_font,navbar_type,navbar_transparent,navbar_hidden,studio_name,logo_url,instagram_url,facebook_url,linkedin_url,full_width,default_language,multilanguage";
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
@@ -104,6 +105,11 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             root.setProperty("--color-tertiary", site.tertiary_color || "#F5F5F5");
             root.setProperty("--background-color", site.background_color || "#ffffff");
             root.setProperty("--site-max-width", site.full_width ? "none" : "1400px");
+            root.setProperty("--navbar-height", site.navbar_hidden ? "0rem" : "4rem");
+            if (site.navbar_hidden) {
+              var navToRemove = document.querySelector('[data-component="navigation"]');
+              if (navToRemove) navToRemove.remove();
+            }
 
             var FONT_ALIASES = { "Franklin Gothic Book": "Libre Franklin" };
 
@@ -220,7 +226,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                         var pcIndex = 0;
                         components.forEach(function (comp) {
                           var compHtml = '';
-                          if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config);
+                          if (comp.type === 'header') compHtml = buildHeaderHtml(comp.config, site);
                           if (comp.type === 'cta') compHtml = buildCTAHtml(comp.config);
                           if (comp.type === 'body') compHtml = buildBodyHtml(comp.config);
                           if (comp.type === 'content') compHtml = buildContentHtml(comp.config);
@@ -501,7 +507,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           }
           parsed += escapeHtml(content.slice(lastIndex));
 
-          return '<section data-component="legal" class="px-6 md:px-16 py-16 md:py-24">' +
+          return '<section data-component="legal" class="px-6 md:px-16 pt-[var(--navbar-height,4rem)] md:pt-[calc(var(--navbar-height,4rem)+2rem)] pb-16 md:pb-24">' +
             '<h1 class="text-4xl font-bold mb-8" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h1>' +
             '<div class="text-base leading-relaxed" style="color:var(--color-primary);opacity:0.85;white-space:pre-wrap;">' + parsed + '</div>' +
           '</section>';
@@ -560,7 +566,43 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           return '<a href="' + escapeAttr(url) + '" class="inline-flex items-center gap-2 px-6 py-2.5 bg-black/80 text-white text-sm font-medium rounded-full hover:bg-black transition-colors' + justifyClass + '">' + content + '</a>';
         }
 
-        function buildHeaderHtml(config) {
+        function buildHeaderOverlayHtml(slide, site, align, buttonHtml) {
+          var showLogo = !!(slide.show_logo && site && site.logo_url);
+          var centerLogoTitle = showLogo && slide.logo_title_align === "center";
+          var wrapClass = align === "center" ? "text-center" : "max-w-lg";
+          var logoClass = align === "center" ? "h-10 md:h-14 w-auto mx-auto mb-4" : "h-10 md:h-14 w-auto mb-4";
+          var logoHtml = showLogo ? '<img src="' + escapeAttr(site.logo_url) + '" alt="" class="' + logoClass + '">' : '';
+          var titleHtml = '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>';
+          var descriptionHtml = '<div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content">' + (slide.description || '') + '</div>';
+
+          var innerHtml;
+          var outerJustifyClass;
+          if (centerLogoTitle) {
+            innerHtml =
+              '<div class="flex-1 min-h-0 flex flex-col justify-center ' + wrapClass + '">' +
+                logoHtml +
+                titleHtml +
+              '</div>' +
+              '<div class="' + wrapClass + '">' +
+                descriptionHtml +
+                buttonHtml +
+              '</div>';
+            outerJustifyClass = '';
+          } else {
+            innerHtml =
+              '<div class="' + wrapClass + '">' +
+                logoHtml +
+                titleHtml +
+                descriptionHtml +
+                buttonHtml +
+              '</div>';
+            outerJustifyClass = ' justify-end';
+          }
+
+          return '<div class="relative z-10 flex flex-col h-full px-6 md:px-16 pb-12 md:pb-16' + outerJustifyClass + '">' + innerHtml + '</div>';
+        }
+
+        function buildHeaderHtml(config, site) {
           if (!config || config.length === 0) return '';
 
           var isCarousel = config.length > 1;
@@ -582,39 +624,18 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 '</div>'
               : '';
 
-            if (slide.type === 1) {
-              return (
-                '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
-                  '<div class="' + bgClass + '"' + bgStyle + '>' +
-                    iframeHtml +
-                    '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
-                    '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
-                      '<div class="max-w-2xl mx-auto text-center">' +
-                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
-                        '<div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content">' + (slide.description || '') + '</div>' +
-                        buttonHtml +
-                      '</div>' +
-                    '</div>' +
-                  '</div>' +
-                '</div>'
-              );
-            } else {
-              return (
-                '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
-                  '<div class="' + bgClass + '"' + bgStyle + '>' +
-                    iframeHtml +
-                    '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
-                    '<div class="relative z-10 flex flex-col justify-end h-full px-6 md:px-16 pb-12 md:pb-16">' +
-                      '<div class="max-w-lg">' +
-                        '<h1 class="text-sm md:text-base font-semibold tracking-[0.2em] text-white mb-3" style="font-family: var(--title-font);">' + escapeHtml(slide.title) + '</h1>' +
-                        '<div class="text-sm md:text-base text-white/80 leading-relaxed mb-6 html-content">' + (slide.description || '') + '</div>' +
-                        buttonHtml +
-                      '</div>' +
-                    '</div>' +
-                  '</div>' +
-                '</div>'
-              );
-            }
+            var align = slide.type === 1 ? "center" : "left";
+            var overlayHtml = buildHeaderOverlayHtml(slide, site, align, buttonHtml);
+
+            return (
+              '<div class="carousel-slide absolute inset-0 transition-opacity duration-700 ' + opacityClass + '" data-slide-index="' + index + '">' +
+                '<div class="' + bgClass + '"' + bgStyle + '>' +
+                  iframeHtml +
+                  '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>' +
+                  overlayHtml +
+                '</div>' +
+              '</div>'
+            );
           }).join("");
 
           var controlsHtml = "";
@@ -1242,12 +1263,14 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     </noscript>
   </head>
   <body>
-    <Navigation
-      site={site}
-      pages={pages}
-      siteSlug={site.slug}
-      currentPageSlug={currentPageSlug}
-    />
+    {!site.navbar_hidden && (
+      <Navigation
+        site={site}
+        pages={pages}
+        siteSlug={site.slug}
+        currentPageSlug={currentPageSlug}
+      />
+    )}
     <main id="page-content">
       <slot />
     </main>

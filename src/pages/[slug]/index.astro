@@ -35,7 +35,7 @@ if (components.some((c) => c.type === "project_columns")) {
 <BaseLayout site={site} pages={pages} currentPageSlug="home">
   {components.map((component) => {
     if (component.type === "header") {
-      return <Header config={component.config as any} />;
+      return <Header config={component.config as any} logoUrl={site.logo_url} />;
     }
     if (component.type === "cta") {
       return <CTA config={component.config as any} />;

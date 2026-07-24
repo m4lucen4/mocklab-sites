@@ -75,7 +75,7 @@ if (projectOrder.length > 0) {
     <div class="flex flex-col gap-8">
       {components.map((component) => {
         if (component.type === "header") {
-          return <Header config={component.config as any} />;
+          return <Header config={component.config as any} logoUrl={site.logo_url} />;
         }
         if (component.type === "cta") {
           return <CTA config={component.config as any} />;
