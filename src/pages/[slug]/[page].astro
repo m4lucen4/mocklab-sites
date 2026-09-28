@@ -24,7 +24,7 @@ const pages = await getSitePages(site.id);
 const allPages = await getAllSitePages(site.id);
 const currentPage = allPages.find((p) => p.slug === pageSlug);
 
-if (!currentPage) {
+if (!currentPage || (pageSlug === "proyectos" && !currentPage.visible)) {
   return Astro.redirect('/404');
 }
 

@@ -12,8 +12,14 @@ if (!site) {
   return Astro.redirect('/404');
 }
 
-const [pages, projects, projectListComp] = await Promise.all([
-  getSitePages(site.id),
+const pages = await getSitePages(site.id);
+const projectsPage = pages.find((page) => page.slug === "proyectos");
+
+if (!projectsPage) {
+  return Astro.redirect('/404');
+}
+
+const [projects, projectListComp] = await Promise.all([
   getUserProjects(site.user_id),
   getProjectListComponent(site.id),
 ]);
