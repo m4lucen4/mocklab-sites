@@ -686,6 +686,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             var sectionClass = isLeft
               ? 'flex items-center w-full bg-white'
               : 'flex items-center justify-center w-full bg-white';
+            var sectionStyle = 'min-height:500px;' +
+              (config.split_color ? 'background-color:' + escapeAttr(config.split_color) + ';' : '');
             var innerClass = isLeft
               ? 'px-6 md:px-16 py-16 max-w-2xl'
               : 'text-center px-6 py-16 max-w-3xl mx-auto';
@@ -696,7 +698,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
               ? '<div class="' + btnsClass + '">' + primaryBtn + secondaryBtn + '</div>'
               : '';
             html =
-              '<section data-component="cta" class="' + sectionClass + '" style="min-height:500px;">' +
+              '<section data-component="cta" class="' + sectionClass + '" style="' + sectionStyle + '">' +
                 '<div class="' + innerClass + '">' +
                   (config.subtitle ? '<p class="text-sm font-medium text-gray-400 mb-3 tracking-wide">' + escapeHtml(config.subtitle) + '</p>' : '') +
                   '<h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font);">' + escapeHtml(title) + '</h2>' +

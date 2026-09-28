@@ -4,6 +4,8 @@
 .html-content em { font-style: italic; }
 .html-content p { margin: 0; }
 .html-content p + p { margin-top: 0.10em; }
+.html-content p:empty,
+.html-content p:has(> br:only-child) { min-height: 1lh; }
 
 .html-content a {
   color: var(--color-primary);
