@@ -77,6 +77,18 @@ export interface BodyConfig {
   type: 1 | 2 | 3 | 4 | 5;
 }
 
+export interface EditorialCard {
+  image_url?: string;
+  title?: string;
+  description?: string;
+  text_secondary_button?: string;
+  url_secondary_button?: string;
+}
+
+export interface EditorialCardsConfig {
+  cards: [EditorialCard, EditorialCard];
+}
+
 export interface ProjectListConfig {
   layout?: "grid-4" | "grid-alternating";
   project_order?: string[];

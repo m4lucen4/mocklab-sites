@@ -1,6 +1,6 @@
 ---
 import { getSiteBySlug, getSitePages, getAllSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { SiteComponent, Project, BodyConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
+import type { SiteComponent, Project, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -11,6 +11,7 @@ import LegalPage from "../../components/LegalPage.astro";
 import ProjectColumns from "../../components/ProjectColumns.astro";
 import RichText from "../../components/RichText.astro";
 import Figure from "../../components/Figure.astro";
+import EditorialCards from "../../components/EditorialCards.astro";
 
 const { slug, page: pageSlug } = Astro.params;
 
@@ -85,6 +86,9 @@ if (projectOrder.length > 0) {
         }
         if (component.type === "content") {
           return <Content config={component.config as any} primaryColor={site.primary_color} secondaryColor={site.secondary_color} />;
+        }
+        if (component.type === "editorial_cards") {
+          return <EditorialCards config={component.config as EditorialCardsConfig} />;
         }
         if (component.type === "project_columns") {
           return <ProjectColumns config={component.config as ProjectColumnsConfig} projects={projects} siteSlug={site.slug} />;

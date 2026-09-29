@@ -1,0 +1,52 @@
+---
+import type { EditorialCardsConfig } from "../types";
+
+interface Props {
+  config: EditorialCardsConfig;
+}
+
+const { config } = Astro.props;
+const cards = config.cards.slice(0, 2).filter((card) => (
+  card.image_url ||
+  card.title ||
+  card.description ||
+  (card.text_secondary_button && card.url_secondary_button)
+));
+
+function linkProps(url: string) {
+  return url.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {};
+}
+---
+
+{cards.length > 0 && (
+  <section data-component="editorial_cards" class="px-6 md:px-16 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {cards.map((card) => (
+        <article class="flex flex-col gap-4">
+          {card.image_url && (
+            <img src={card.image_url} alt="" class="w-full aspect-[4/3] object-cover" />
+          )}
+          {card.title && (
+            <h2 class="text-2xl font-bold" style="color: var(--color-primary); font-family: var(--title-font);">
+              {card.title}
+            </h2>
+          )}
+          {card.description && (
+            <div class="text-base leading-relaxed html-content" style="color: var(--color-primary); opacity: 0.75;" set:html={card.description} />
+          )}
+          {card.text_secondary_button && card.url_secondary_button && (
+            <a
+              href={card.url_secondary_button}
+              {...linkProps(card.url_secondary_button)}
+              class="inline-flex items-center gap-2 font-semibold"
+              style="color: var(--color-primary);"
+            >
+              {card.text_secondary_button}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+)}
