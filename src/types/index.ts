@@ -91,6 +91,7 @@ export interface EditorialCardsConfig {
 
 export interface ProjectListConfig {
   layout?: "grid-4" | "grid-alternating";
+  show_descriptions?: boolean;
   project_order?: string[];
   hidden_projects?: string[];
   detail_type?: 1 | 2;

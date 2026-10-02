@@ -1,6 +1,6 @@
 ---
 import { getSiteBySlug, getSitePages, getAllSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
-import type { SiteComponent, Project, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
+import type { SiteComponent, Project, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, ProjectListConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -45,9 +45,11 @@ if (needsProjects) {
 }
 
 const projectListComp = components.find((c) => c.type === "project_list");
-const projectListLayout = (projectListComp?.config as any)?.layout ?? "grid-4";
-const projectOrder: string[] = (projectListComp?.config as any)?.project_order ?? [];
-const hiddenProjects: string[] = (projectListComp?.config as any)?.hidden_projects ?? [];
+const projectListConfig = projectListComp?.config as ProjectListConfig | undefined;
+const projectListLayout = projectListConfig?.layout ?? "grid-4";
+const showDescriptions = projectListConfig?.show_descriptions ?? true;
+const projectOrder = projectListConfig?.project_order ?? [];
+const hiddenProjects = projectListConfig?.hidden_projects ?? [];
 
 if (hiddenProjects.length > 0) {
   const hiddenSet = new Set(hiddenProjects.map(String));
@@ -108,7 +110,7 @@ if (projectOrder.length > 0) {
       })}
 
       {currentPage.slug === "proyectos" && (
-        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} fullWidth={!!site.full_width} />
+        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} />
       )}
     </div>
   )}
