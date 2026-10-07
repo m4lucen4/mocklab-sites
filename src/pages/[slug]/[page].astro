@@ -110,7 +110,7 @@ if (projectOrder.length > 0) {
       })}
 
       {currentPage.slug === "proyectos" && (
-        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} />
+        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} language={site.default_language ?? "en"} />
       )}
     </div>
   )}
