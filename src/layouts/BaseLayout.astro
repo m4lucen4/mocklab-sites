@@ -1,19 +1,25 @@
 ---
 import "../styles/global.css";
-import type { Site, SitePage } from "../types";
+import type { Site, SitePage, SiteComponent } from "../types";
 import Navigation from "../components/Navigation.astro";
 import Footer from "../components/Footer.astro";
 import CookieBanner from "../components/CookieBanner.astro";
 import { normalizeSiteLanguages, translations, languageRuntime } from "../lib/siteLanguages";
+import { navigationRuntime } from '../lib/siteNavigation';
+import { getPageComponents } from '../lib/supabase';
 
 interface Props {
   site: Site;
   pages?: SitePage[];
   currentPageSlug?: string;
+  homeComponents?: SiteComponent[];
 }
 
-const { site, pages = [], currentPageSlug = "home" } = Astro.props;
+const { site, pages = [], currentPageSlug = "home", homeComponents: providedHomeComponents } = Astro.props;
 const languageConfig = normalizeSiteLanguages(site);
+// Resolve home targets here so custom, project, detail and legal routes share navigation.
+const navigationHome = pages.find(p => p.site_id === site.id && p.slug === 'home' && p.page_type !== 'home_anchor' && p.visible);
+const homeComponents = providedHomeComponents ?? (navigationHome ? await getPageComponents(navigationHome.id).catch(() => []) : []);
 
 const FONT_ALIASES: Record<string, string> = {
   "Franklin Gothic Book": "Libre Franklin",
@@ -65,6 +71,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
     </style>
 
     <script is:inline set:html={languageRuntime} />
+    <script is:inline set:html={navigationRuntime} />
     <script is:inline define:vars={{
       SITE_TRANSLATIONS: translations,
       PUBLIC_SUPABASE_URL: import.meta.env.PUBLIC_SUPABASE_URL,
@@ -90,7 +97,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
         // Fetch all visible pages (for nav + current page components)
         var allPagesUrl = baseUrl + "site_pages?site_id=eq.SITE_ID_PLACEHOLDER" +
-          "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav";
+          "&visible=eq.true&order=position.asc&select=id,site_id,slug,title,show_in_nav,visible,page_type,target_component_id";
 
         fetch(siteUrl, { headers: headers })
           .then(function (r) { return r.json(); })
@@ -101,6 +108,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
             }
 
             var site = sites[0];
+            site.slug = slug;
             var root = document.documentElement.style;
 
             // Apply CSS custom properties
@@ -165,13 +173,20 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
 
             // Fetch all visible pages in one request
             var pagesUrl = baseUrl + "site_pages?site_id=eq." + site.id +
-              "&visible=eq.true&order=position.asc&select=id,slug,title,show_in_nav,content";
+              "&visible=eq.true&order=position.asc&select=id,site_id,slug,title,show_in_nav,content,visible,page_type,target_component_id";
 
             return fetch(pagesUrl, { headers: headers })
               .then(function (r) { return r.json(); })
               .then(function (pages) {
                 if (!pages) pages = [];
 
+                window.__sitePages = pages;
+                var home = pages.find(function (p) { return p.slug === 'home' && p.site_id === site.id && p.page_type !== 'home_anchor'; });
+                var homeRequest = home ? fetch(baseUrl + 'site_components?page_id=eq.' + encodeURIComponent(home.id) +
+                  '&visible=eq.true&order=position.asc&select=id,page_id,type,config,visible,anchor_id', { headers: headers })
+                  .then(function (r) { if (!r.ok) throw new Error('Home targets unavailable'); return r.json(); }) : Promise.resolve([]);
+                return homeRequest.catch(function () { return null; }).then(function (homeTargets) {
+                window.__siteHomeComponents = Array.isArray(homeTargets) ? homeTargets : [];
                 // Re-render navigation with fresh data
                 var navPages = pages.filter(function (p) { return p.show_in_nav; });
                 window.__siteNavPages = navPages;
@@ -199,6 +214,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 // Find current page and fetch its components
                 var currentPage = pages.find(function (p) { return p.slug === (pageSlug || "home"); });
                 if (!currentPage) return;
+                // A failed target request must not erase ordinary SSR home content.
+                if (home && currentPage.id === home.id && homeTargets === null) return;
 
                 // Special page: render legal content directly, skip components fetch
                 if (currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies") {
@@ -212,9 +229,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                 }
 
                 var compUrl = baseUrl + "site_components?page_id=eq." + currentPage.id +
-                  "&visible=eq.true&order=position.asc&select=type,config";
-                return fetch(compUrl, { headers: headers })
-                  .then(function (r) { return r.json(); })
+                  "&visible=eq.true&order=position.asc&select=id,page_id,type,config,visible,anchor_id";
+                return (currentPage.id === (home && home.id) ? Promise.resolve(window.__siteHomeComponents) : fetch(compUrl, { headers: headers }).then(function (r) { return r.json(); }))
                   .then(function (components) {
                     var pageContent = document.getElementById('page-content');
                     var preservedEls = pageContent
@@ -251,6 +267,8 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                             compHtml = buildProjectColumnsHtml(comp.config, pcDataByIndex[pcIndex] || []);
                             pcIndex++;
                           }
+                          var anchorId = currentPage.slug === 'home' ? homeAnchorId(comp, currentPage, components) : null;
+                          if (anchorId) compHtml = '<div id="' + anchorId + '" data-home-anchor>' + compHtml + '</div>';
                           if (compHtml) {
                             if (compIndex > 0) pageHtml += '<div style="height:2rem;"></div>';
                             pageHtml += compHtml;
@@ -262,6 +280,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                       if (pageContent) {
                         pageContent.innerHTML = pageHtml;
                         preservedEls.forEach(function (el) { pageContent.appendChild(el); });
+                        resolveHomeHash();
                         var headerEl = pageContent.querySelector('[data-component="header"]');
                         if (headerEl && headerEl.querySelectorAll('[data-slide-index]').length > 1) {
                           initCarousel(headerEl);
@@ -269,6 +288,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
                       }
                     });
                   });
+                });
               });
           })
           .catch(function () {
@@ -277,6 +297,42 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
           .finally(function () {
             document.body.classList.add("styles-ready");
           });
+
+        function resolveHomeHash() {
+          var target = getHomeHashTarget(window.location.hash);
+          if (!target) return;
+          requestAnimationFrame(function () {
+            target.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+          });
+        }
+        function getHomeHashTarget(hash) {
+          var id;
+          try { id = normalizeAnchorId(decodeURIComponent(hash.slice(1))); }
+          catch (e) { return null; }
+          if (!id) return null;
+          var target = document.getElementById(id);
+          return target && target.hasAttribute('data-home-anchor') ? target : null;
+        }
+        window.addEventListener('hashchange', resolveHomeHash);
+        document.addEventListener('click', function (event) {
+          if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          var link = event.target && event.target.closest && event.target.closest('a[href]');
+          if (!link || link.hasAttribute('download') || (link.target && link.target.toLowerCase() !== '_self')) return;
+          var url;
+          try { url = new URL(link.href, window.location.href); } catch (e) { return; }
+          if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || url.search !== window.location.search || !url.hash) return;
+          if (!getHomeHashTarget(url.hash)) return;
+          // Updating the hash through history avoids the browser's instant jump.
+          // Leave native navigation intact if history cannot be updated.
+          if (url.hash !== window.location.hash) {
+            try { window.history.pushState(window.history.state, '', url.href); }
+            catch (e) { return; }
+          }
+          event.preventDefault();
+          var menu = document.getElementById('mobile-menu');
+          if (menu) { menu.classList.add('hidden'); menu.classList.remove('flex'); }
+          resolveHomeHash();
+        });
 
         // ─── Translations ────────────────────────────────────────────────────
         var TRANSLATIONS = SITE_TRANSLATIONS;
@@ -362,12 +418,13 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         function buildMenuHtml(navPages, siteSlug, currentPageSlug, lang) {
           var navTitles = { home: t('nav_home', lang), proyectos: t('nav_projects', lang) };
           var links = navPages.map(function (p) {
-            var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
-            var cls = p.slug === currentPageSlug
+            var href = pageHref(window.__siteSite, p, window.__sitePages || [], window.__siteHomeComponents || []);
+            if (!href) return '';
+            var cls = p.page_type !== 'home_anchor' && p.slug === currentPageSlug
               ? "text-base tracking-wide transition-opacity font-semibold opacity-100"
               : "text-base tracking-wide transition-opacity opacity-60 hover:opacity-100";
             var label = navTitles[p.slug] || p.title;
-            return '<li><a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a></li>';
+            return '<li><a href="' + escapeAttr(href) + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a></li>';
           }).join("");
           return '<ul class="hidden md:flex items-center gap-8 flex-1">' + links + '</ul>';
         }
@@ -375,12 +432,13 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         function buildMobileMenuHtml(navPages, siteSlug, currentPageSlug, site, lang) {
           var navTitles = { home: t('nav_home', lang), proyectos: t('nav_projects', lang) };
           var links = navPages.map(function (p) {
-            var href = p.slug === "home" ? "/" + siteSlug + "/" : "/" + siteSlug + "/" + p.slug;
-            var cls = p.slug === currentPageSlug
+            var href = pageHref(window.__siteSite, p, window.__sitePages || [], window.__siteHomeComponents || []);
+            if (!href) return '';
+            var cls = p.page_type !== 'home_anchor' && p.slug === currentPageSlug
               ? "text-base tracking-wide font-semibold opacity-100"
               : "text-base tracking-wide opacity-60";
             var label = navTitles[p.slug] || p.title;
-            return '<a href="' + href + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a>';
+            return '<a href="' + escapeAttr(href) + '" class="' + cls + '" style="color:var(--color-tertiary);">' + escapeHtml(label) + '</a>';
           }).join("");
 
           var socials = buildSocialsHtml(site);
@@ -1296,6 +1354,7 @@ const cssVars = `--color-primary: ${site.primary_color}; --color-secondary: ${si
         pages={pages}
         siteSlug={site.slug}
         currentPageSlug={currentPageSlug}
+        homeComponents={homeComponents}
       />
     )}
     <main id="page-content">
