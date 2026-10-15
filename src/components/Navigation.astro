@@ -1,5 +1,6 @@
 ---
-import type { Site, SitePage } from "../types";
+import type { Site, SitePage, SiteComponent } from "../types";
+import { pageHref } from '../lib/siteNavigation';
 import { normalizeSiteLanguages, fixedLabel } from "../lib/siteLanguages";
 
 interface Props {
@@ -7,10 +8,11 @@ interface Props {
   pages: SitePage[];
   siteSlug: string;
   currentPageSlug?: string;
+  homeComponents?: SiteComponent[];
 }
 
-const { site, pages, siteSlug, currentPageSlug = "home" } = Astro.props;
-const navPages = pages.filter((p) => p.show_in_nav);
+const { site, pages, siteSlug, currentPageSlug = "home", homeComponents = [] } = Astro.props;
+const navPages = pages.filter((p) => p.show_in_nav && pageHref(site, p, pages, homeComponents));
 
 const { enabledLanguages, defaultLanguage: lang, multilanguage } = normalizeSiteLanguages(site);
 const NAV_TITLES: Record<string, string> = { home: fixedLabel('nav_home', lang), proyectos: fixedLabel('nav_projects', lang) };
@@ -36,8 +38,8 @@ const socials = [
         <!-- Menu (left) -->
         <ul class="hidden md:flex items-center gap-8 flex-1">
           {navPages.map((page) => {
-            const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
-            const isActive = page.slug === currentPageSlug;
+            const href = pageHref(site, page, pages, homeComponents)!;
+            const isActive = page.page_type !== 'home_anchor' && page.slug === currentPageSlug;
             return (
               <li>
                 <a
@@ -130,8 +132,8 @@ const socials = [
         <!-- Menu (center) -->
         <ul class="hidden md:flex items-center gap-8 flex-1">
           {navPages.map((page) => {
-            const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
-            const isActive = page.slug === currentPageSlug;
+            const href = pageHref(site, page, pages, homeComponents)!;
+            const isActive = page.page_type !== 'home_anchor' && page.slug === currentPageSlug;
             return (
               <li>
                 <a
@@ -206,8 +208,8 @@ const socials = [
     style="background-color: var(--color-secondary);"
   >
     {navPages.map((page) => {
-      const href = page.slug === "home" ? `/${siteSlug}/` : `/${siteSlug}/${page.slug}`;
-      const isActive = page.slug === currentPageSlug;
+      const href = pageHref(site, page, pages, homeComponents)!;
+      const isActive = page.page_type !== 'home_anchor' && page.slug === currentPageSlug;
       return (
         <a
           href={href}

@@ -4,6 +4,7 @@ import type { SiteComponent, BodyConfig, EditorialCardsConfig, ProjectColumnsCon
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { normalizeSiteLanguages } from '../../lib/siteLanguages';
 import Header from "../../components/Header.astro";
+import { homeAnchorId } from '../../lib/siteNavigation';
 import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
 import Content from "../../components/Content.astro";
@@ -22,7 +23,7 @@ if (!site) {
 
 const { defaultLanguage: language } = normalizeSiteLanguages(site);
 const pages = await getSitePages(site.id);
-const homePage = pages.find((p) => p.slug === "home");
+const homePage = pages.find((p) => p.slug === "home" && p.page_type !== 'home_anchor');
 
 let components: SiteComponent[] = [];
 if (homePage) {
@@ -35,8 +36,19 @@ if (components.some((c) => c.type === "project_columns")) {
 }
 ---
 
-<BaseLayout site={site} pages={pages} currentPageSlug="home">
+<BaseLayout site={site} pages={pages} currentPageSlug="home" homeComponents={components}>
   {components.map((component) => {
+    const block = (() => {
+    if (component.type === "contact") {
+      const config = (component.config || {}) as any;
+      return <section data-component="contact" class="px-6 md:px-16 py-10 md:py-14">
+        {config.antetitulo && <p class="text-xs font-semibold mb-3" style="color:var(--color-primary)">{config.antetitulo}</p>}
+        {config.titulo && <h2 class="text-4xl font-bold mb-4" style="color:var(--color-primary);font-family:var(--title-font)">{config.titulo}</h2>}
+        {config.descripcion && <div class="html-content" set:html={config.descripcion} />}
+        {config.direccion1 && <div class="html-content" set:html={config.direccion1} />}
+        {config.direccion2 && <div class="html-content" set:html={config.direccion2} />}
+      </section>;
+    }
     if (component.type === "header") {
       return <Header config={component.config as any} logoUrl={site.logo_url} language={language} />;
     }
@@ -67,5 +79,8 @@ if (components.some((c) => c.type === "project_columns")) {
       return <Figure config={component.config as FigureConfig} />;
     }
     return null;
+    })();
+    const anchorId = homeAnchorId(component, homePage, components);
+    return anchorId ? <div id={anchorId} data-home-anchor>{block}</div> : block;
   })}
 </BaseLayout>

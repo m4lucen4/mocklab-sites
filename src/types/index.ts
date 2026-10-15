@@ -30,6 +30,8 @@ export interface Site {
 }
 
 export interface SitePage {
+  page_type?: 'page' | 'home_anchor' | null;
+  target_component_id?: string | null;
   id: string;
   site_id: string;
   title: string;
@@ -57,6 +59,7 @@ export interface HeaderSlide {
 }
 
 export interface SiteComponent {
+  anchor_id?: string | null;
   id: string;
   page_id: string;
   type: string;

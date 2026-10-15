@@ -2,6 +2,7 @@
 import { getSiteBySlug, getSitePages, getAllSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
 import type { SiteComponent, Project, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, ProjectListConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { pageHref } from '../../lib/siteNavigation';
 import { normalizeSiteLanguages, fixedLabel } from '../../lib/siteLanguages';
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
@@ -29,6 +30,14 @@ const currentPage = allPages.find((p) => p.slug === pageSlug);
 
 if (!currentPage || (pageSlug === "proyectos" && !currentPage.visible)) {
   return Astro.redirect('/404');
+}
+
+// Link-only aliases never fetch or render their own components.
+if (currentPage.page_type === 'home_anchor') {
+  const home = allPages.find(p => p.slug === 'home' && p.site_id === site.id && p.page_type !== 'home_anchor' && p.visible);
+  const homeComponents = home ? await getPageComponents(home.id) : [];
+  const href = pageHref(site, currentPage, allPages, homeComponents);
+  return Astro.redirect(href || '/404');
 }
 
 const isLegal = currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies";

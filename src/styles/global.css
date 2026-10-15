@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+[data-home-anchor] {
+  scroll-margin-top: var(--navbar-height, 4rem);
+}
+
 .html-content strong { font-weight: 700; }
 .html-content em { font-style: italic; }
 .html-content p { margin: 0; }
