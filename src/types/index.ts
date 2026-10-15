@@ -21,7 +21,8 @@ export interface Site {
   navbar_transparent?: boolean;
   navbar_hidden?: boolean;
   footer_hidden?: boolean;
-  default_language?: "es" | "en";
+  default_language?: "es" | "en" | "ca";
+  enabled_languages?: ("es" | "en" | "ca")[] | null;
   multilanguage?: boolean;
   published: boolean;
   created_at: string;

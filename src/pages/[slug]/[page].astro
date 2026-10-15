@@ -2,6 +2,7 @@
 import { getSiteBySlug, getSitePages, getAllSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
 import type { SiteComponent, Project, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, ProjectListConfig, RichTextConfig, SeparatorConfig, FigureConfig } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { normalizeSiteLanguages, fixedLabel } from '../../lib/siteLanguages';
 import Header from "../../components/Header.astro";
 import ProjectList from "../../components/ProjectList.astro";
 import CTA from "../../components/CTA.astro";
@@ -21,6 +22,7 @@ if (!site) {
   return Astro.redirect('/404');
 }
 
+const { defaultLanguage: language } = normalizeSiteLanguages(site);
 const pages = await getSitePages(site.id);
 const allPages = await getAllSitePages(site.id);
 const currentPage = allPages.find((p) => p.slug === pageSlug);
@@ -32,8 +34,8 @@ if (!currentPage || (pageSlug === "proyectos" && !currentPage.visible)) {
 const isLegal = currentPage.slug === "aviso-legal" || currentPage.slug === "politica-cookies";
 
 const LEGAL_TITLES: Record<string, string> = {
-  "aviso-legal": "Legal Notice",
-  "politica-cookies": "Cookie Policy",
+  "aviso-legal": fixedLabel('legal_aviso', language),
+  "politica-cookies": fixedLabel('legal_cookies', language),
 };
 
 const components = isLegal ? [] : await getPageComponents(currentPage.id);
@@ -73,12 +75,12 @@ if (projectOrder.length > 0) {
 
 <BaseLayout site={site} pages={pages} currentPageSlug={currentPage.slug}>
   {isLegal ? (
-    <LegalPage title={LEGAL_TITLES[currentPage.slug] ?? currentPage.title} content={currentPage.content} />
+    <LegalPage title={LEGAL_TITLES[currentPage.slug] ?? currentPage.title} titleKey={currentPage.slug === 'aviso-legal' ? 'legal_aviso' : 'legal_cookies'} content={currentPage.content} />
   ) : (
     <div class="flex flex-col gap-8">
       {components.map((component) => {
         if (component.type === "header") {
-          return <Header config={component.config as any} logoUrl={site.logo_url} />;
+          return <Header config={component.config as any} logoUrl={site.logo_url} language={language} />;
         }
         if (component.type === "cta") {
           return <CTA config={component.config as any} />;
@@ -110,7 +112,7 @@ if (projectOrder.length > 0) {
       })}
 
       {currentPage.slug === "proyectos" && (
-        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} language={site.default_language ?? "en"} />
+        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} language={language} />
       )}
     </div>
   )}

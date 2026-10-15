@@ -1,5 +1,6 @@
 ---
 import type { Site, SitePage } from "../types";
+import { normalizeSiteLanguages, fixedLabel } from "../lib/siteLanguages";
 
 interface Props {
   site: Site;
@@ -11,10 +12,8 @@ interface Props {
 const { site, pages, siteSlug, currentPageSlug = "home" } = Astro.props;
 const navPages = pages.filter((p) => p.show_in_nav);
 
-const lang = (site.default_language || "en") as "es" | "en";
-const NAV_TITLES: Record<string, string> = lang === "es"
-  ? { home: "Inicio", proyectos: "Proyectos" }
-  : { home: "Home", proyectos: "Projects" };
+const { enabledLanguages, defaultLanguage: lang, multilanguage } = normalizeSiteLanguages(site);
+const NAV_TITLES: Record<string, string> = { home: fixedLabel('nav_home', lang), proyectos: fixedLabel('nav_projects', lang) };
 const navType = site.navbar_type ?? 1;
 
 const socials = [
@@ -90,9 +89,9 @@ const socials = [
               )}
             </a>
           ))}
-          {site.multilanguage && (
+          {multilanguage && (
             <div class="flex items-center gap-0.5">
-              {(["es", "en"] as const).map((l) => (
+              {enabledLanguages.map((l) => (
                 <button
                   data-lang-btn={l}
                   class="text-xs font-semibold tracking-wider px-2 py-0.5 rounded border-none cursor-pointer transition-all"
@@ -108,7 +107,7 @@ const socials = [
         </div>
 
         <!-- Mobile hamburger -->
-        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Open menu" style="color: var(--color-tertiary);">
+        <button class="md:hidden ml-auto" id="menu-toggle" data-i18n-aria-label="open_menu" aria-label={fixedLabel('open_menu', lang)} style="color: var(--color-tertiary);">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
@@ -173,9 +172,9 @@ const socials = [
               )}
             </a>
           ))}
-          {site.multilanguage && (
+          {multilanguage && (
             <div class="flex items-center gap-0.5">
-              {(["es", "en"] as const).map((l) => (
+              {enabledLanguages.map((l) => (
                 <button
                   data-lang-btn={l}
                   class="text-xs font-semibold tracking-wider px-2 py-0.5 rounded border-none cursor-pointer transition-all"
@@ -191,7 +190,7 @@ const socials = [
         </div>
 
         <!-- Mobile hamburger -->
-        <button class="md:hidden ml-auto" id="menu-toggle" aria-label="Open menu" style="color: var(--color-tertiary);">
+        <button class="md:hidden ml-auto" id="menu-toggle" data-i18n-aria-label="open_menu" aria-label={fixedLabel('open_menu', lang)} style="color: var(--color-tertiary);">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
@@ -247,9 +246,9 @@ const socials = [
         ))}
       </div>
     )}
-    {site.multilanguage && (
+    {multilanguage && (
       <div class="flex items-center gap-1 pt-2">
-        {(["es", "en"] as const).map((l) => (
+        {enabledLanguages.map((l) => (
           <button
             data-lang-btn={l}
             class="text-xs font-semibold tracking-wider px-3 py-1 rounded border-none cursor-pointer transition-all"

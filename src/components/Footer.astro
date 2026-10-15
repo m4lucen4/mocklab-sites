@@ -1,5 +1,6 @@
 ---
 import type { Site } from "../types";
+import { normalizeSiteLanguages, fixedLabel } from "../lib/siteLanguages";
 
 interface Props {
   site: Site;
@@ -8,11 +9,12 @@ interface Props {
 
 const { site, siteSlug } = Astro.props;
 const currentYear = new Date().getFullYear();
-const lang = (site.default_language || "en") as "es" | "en";
+const { defaultLanguage: lang } = normalizeSiteLanguages(site);
 const footerTx = {
-  es: { legal: "Aviso legal", cookies: "Política de cookies", manage: "Gestionar cookies" },
-  en: { legal: "Legal Notice", cookies: "Cookie Policy", manage: "Manage cookies" },
-}[lang];
+  legal: fixedLabel('footer_legal', lang),
+  cookies: fixedLabel('footer_cookies', lang),
+  manage: fixedLabel('footer_manage', lang),
+};
 ---
 
 <footer
