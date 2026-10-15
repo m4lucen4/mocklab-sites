@@ -1,5 +1,6 @@
 ---
 import type { Project } from "../types";
+import { fixedLabel } from "../lib/siteLanguages";
 
 interface Props {
   projects: Project[];
@@ -11,9 +12,7 @@ interface Props {
 }
 
 const { projects, siteSlug, layout = "grid-4", showDescriptions = true, fullWidth = false, language = "en" } = Astro.props;
-const labels = language === "es"
-  ? { title: "Proyectos", filter: "Filtrar por categoría" }
-  : { title: "Projects", filter: "Filter by category" };
+const labels = { title: fixedLabel('project_list_title', language), filter: fixedLabel('project_list_filter', language) };
 
 const groups: Project[][] = [];
 if (layout === "grid-alternating") {
@@ -46,13 +45,13 @@ const allCategories = Array.from(
         <div class="flex items-center gap-4">
           <!-- View toggle -->
           <div class="flex items-center gap-1">
-            <button id="btn-view-grid" class="p-1.5 text-neutral-900 transition-colors" aria-label="Grid view" title="Grid view">
+            <button id="btn-view-grid" class="p-1.5 text-neutral-900 transition-colors" data-i18n-aria-label="view_grid" data-i18n-title="view_grid" aria-label={fixedLabel('view_grid', language)} title={fixedLabel('view_grid', language)}>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                 <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
               </svg>
             </button>
-            <button id="btn-view-list" class="p-1.5 text-neutral-400 transition-colors" aria-label="List view" title="List view">
+            <button id="btn-view-list" class="p-1.5 text-neutral-400 transition-colors" data-i18n-aria-label="view_list" data-i18n-title="view_list" aria-label={fixedLabel('view_list', language)} title={fixedLabel('view_list', language)}>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
@@ -246,6 +245,7 @@ const allCategories = Array.from(
 </style>
 
 <script>
+  import { fixedLabel } from '../lib/siteLanguages';
   const select = document.getElementById("keyword-select") as HTMLSelectElement | null;
   const pillsContainer = document.getElementById("active-pills");
   const viewGrid = document.getElementById("view-grid")!;
@@ -386,7 +386,14 @@ const allCategories = Array.from(
     pill.className = "inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-neutral-900 text-white";
     pill.style.fontFamily = "var(--font-family)";
     pill.dataset.category = category;
-    pill.innerHTML = `${category}<button class="ml-1 hover:opacity-70 transition-opacity" aria-label="Remove filter ${category}">✕</button>`;
+    // Keep authored category values intact and out of HTML interpolation.
+    pill.appendChild(document.createTextNode(category));
+    const removeButton = document.createElement('button');
+    removeButton.className = 'ml-1 hover:opacity-70 transition-opacity';
+    removeButton.textContent = '✕';
+    removeButton.setAttribute('data-remove-filter', category);
+    removeButton.setAttribute('aria-label', `${fixedLabel('remove_filter', document.documentElement.lang)} ${category}`);
+    pill.appendChild(removeButton);
 
     pill.querySelector("button")!.addEventListener("click", () => {
       activeFilters.delete(category);

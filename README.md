@@ -1,5 +1,27 @@
 # mocklab-sites
 
+## Public interface languages
+
+`sites.enabled_languages` optionally selects a nonempty subset of `es`, `en`, `ca`
+(canonical order ES/EN/CA). A valid explicit list is authoritative. Missing, empty,
+or invalid lists preserve the legacy contract: `multilanguage = true` enables
+ES/EN; otherwise only the supported `default_language` (or historical public
+fallback EN) is enabled. An unavailable default resolves to EN if enabled, else
+the first enabled language. Selectors appear only for multiple enabled languages.
+
+SSR and the inline browser renderer share `src/lib/siteLanguages.ts`. Only fixed
+interface labels are translated; authored titles, descriptions, categories, legal
+bodies, metadata and URLs are unchanged. Visitor choices use
+`site_language:{slug}` and are checked against the enabled set; an allowed legacy
+`site_language` choice is imported only when no site-specific choice exists.
+Storage denial does not prevent language switching.
+
+Rollout: deploy the dashboard's additive nullable `enabled_languages text[]`
+migration before this renderer (its browser query selects the column). No legacy
+backfill is required. This change does not apply migrations or publish services.
+Run `node scripts/check-site-languages.mjs` for in-memory helper, actual Astro SSR
+and fake-Supabase browser-script checks; these are not visual browser evidence.
+
 Generador de webs estáticas multi-tenant para clientes de la plataforma **Mocklab**. Un único proyecto Astro genera el site de cada cliente a partir de su configuración almacenada en Supabase.
 
 ---

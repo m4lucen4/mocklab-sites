@@ -2,6 +2,7 @@
 import { getSiteBySlug, getSitePages, getPageComponents, getUserProjects } from "../../lib/supabase";
 import type { SiteComponent, BodyConfig, EditorialCardsConfig, ProjectColumnsConfig, RichTextConfig, SeparatorConfig, FigureConfig, Project } from "../../types";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { normalizeSiteLanguages } from '../../lib/siteLanguages';
 import Header from "../../components/Header.astro";
 import CTA from "../../components/CTA.astro";
 import Body from "../../components/Body.astro";
@@ -19,6 +20,7 @@ if (!site) {
   return Astro.redirect('/404');
 }
 
+const { defaultLanguage: language } = normalizeSiteLanguages(site);
 const pages = await getSitePages(site.id);
 const homePage = pages.find((p) => p.slug === "home");
 
@@ -36,7 +38,7 @@ if (components.some((c) => c.type === "project_columns")) {
 <BaseLayout site={site} pages={pages} currentPageSlug="home">
   {components.map((component) => {
     if (component.type === "header") {
-      return <Header config={component.config as any} logoUrl={site.logo_url} />;
+      return <Header config={component.config as any} logoUrl={site.logo_url} language={language} />;
     }
     if (component.type === "cta") {
       return <CTA config={component.config as any} />;

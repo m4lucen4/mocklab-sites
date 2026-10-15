@@ -1,14 +1,16 @@
 ---
 import { icons as lucideIcons } from "lucide";
 import type { HeaderSlide } from "../types";
+import { fixedLabel } from '../lib/siteLanguages';
 import HeaderSlideOverlay from "./HeaderSlideOverlay.astro";
 
 interface Props {
   config: HeaderSlide[];
   logoUrl?: string | null;
+  language?: string;
 }
 
-const { config, logoUrl } = Astro.props;
+const { config, logoUrl, language = 'en' } = Astro.props;
 const isCarousel = config.length > 1;
 
 function getVimeoSrc(url: string): string | null {
@@ -85,14 +87,14 @@ const s0VimeoSrc = s0IsVimeo && s0?.vimeo_url ? getVimeoSrc(s0.vimeo_url) : null
       <button
         class="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors"
         data-carousel-prev
-        aria-label="Slide anterior"
+        data-i18n-aria-label="previous_slide" aria-label={fixedLabel('previous_slide', language)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
       <button
         class="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full border border-white/60 text-white hover:border-white hover:bg-white/10 transition-colors"
         data-carousel-next
-        aria-label="Siguiente slide"
+        data-i18n-aria-label="next_slide" aria-label={fixedLabel('next_slide', language)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
