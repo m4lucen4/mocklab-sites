@@ -1,7 +1,8 @@
 ---
 import { getSiteBySlug, getSitePages, getProjectListComponent, getUserProjects } from "../../../lib/supabase";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import ProjectDetail from "../../../components/ProjectDetail.astro";
+import LocalizedProjectDetail from "../../../components/LocalizedProjectDetail.astro";
+import { normalizeSiteLanguages } from "../../../lib/siteLanguages";
 import type { ProjectListConfig } from "../../../types";
 
 const { slug, project: projectId } = Astro.params;
@@ -12,6 +13,7 @@ if (!site) {
   return Astro.redirect('/404');
 }
 
+const { defaultLanguage: language, enabledLanguages } = normalizeSiteLanguages(site);
 const pages = await getSitePages(site.id);
 const projectsPage = pages.find((page) => page.slug === "proyectos");
 
@@ -34,5 +36,5 @@ const detailType: 1 | 2 = ((projectListComp?.config as ProjectListConfig)?.detai
 ---
 
 <BaseLayout site={site} pages={pages} currentPageSlug="proyectos">
-  <ProjectDetail project={project} siteSlug={site.slug} detailType={detailType} fullWidth={!!site.full_width} />
+  <LocalizedProjectDetail project={project} siteSlug={site.slug} detailType={detailType} fullWidth={!!site.full_width} language={language} languages={enabledLanguages} />
 </BaseLayout>

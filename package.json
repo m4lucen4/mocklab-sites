@@ -11,7 +11,8 @@
     "start": "node dist/server/entry.mjs",
     "preview": "node dist/server/entry.mjs",
     "astro": "astro",
-    "check:editorial-cards-parity": "node scripts/check-editorial-cards-parity.mjs"
+    "check:editorial-cards-parity": "node scripts/check-editorial-cards-parity.mjs",
+    "check:project-translations": "node scripts/check-project-translations.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.4",

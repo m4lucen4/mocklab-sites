@@ -10,8 +10,10 @@ fallback EN) is enabled. An unavailable default resolves to EN if enabled, else
 the first enabled language. Selectors appear only for multiple enabled languages.
 
 SSR and the inline browser renderer share `src/lib/siteLanguages.ts`. Only fixed
-interface labels are translated; authored titles, descriptions, categories, legal
-bodies, metadata and URLs are unchanged. Visitor choices use
+interface labels are translated. Projects also resolve explicitly authored title,
+description and keyword versions with per-field original fallback; see
+[Project language versions](docs/project-translations.md). Other authored page/component
+text, categories, legal bodies, metadata and URLs are unchanged. Visitor choices use
 `site_language:{slug}` and are checked against the enabled set; an allowed legacy
 `site_language` choice is imported only when no site-specific choice exists.
 Storage denial does not prevent language switching.

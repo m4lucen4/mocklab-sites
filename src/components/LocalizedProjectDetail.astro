@@ -1,0 +1,34 @@
+---
+import type { Project } from '../types';
+import type { SiteLanguage } from '../lib/siteLanguages';
+import { localizeProject } from '../lib/projectTranslations';
+import ProjectDetail from './ProjectDetail.astro';
+
+interface Props {
+  project: Project;
+  siteSlug: string;
+  language: SiteLanguage;
+  languages: SiteLanguage[];
+  detailType?: 1 | 2;
+  fullWidth?: boolean;
+}
+
+const { project, siteSlug, language, languages, detailType = 1, fullWidth = false } = Astro.props;
+const props = { siteSlug, detailType, fullWidth, preserve: false };
+---
+
+<div data-preserve data-project-detail-language={language}>
+  <div data-project-detail-active>
+    <ProjectDetail {...props} project={localizeProject(project, language)} />
+  </div>
+  {languages.filter(code => code !== language).map(code => (
+    <template data-project-detail-template={code}>
+      <ProjectDetail {...props} project={localizeProject(project, code)} />
+    </template>
+  ))}
+</div>
+
+<script>
+  import { initializeProjectTranslations } from '../lib/projectTranslationClient';
+  initializeProjectTranslations();
+</script>

@@ -1,14 +1,16 @@
 ---
 import type { Project } from "../types";
+import { escapeProjectText } from "../lib/projectTranslations";
 
 interface Props {
   project: Project;
   siteSlug: string;
   detailType?: 1 | 2;
   fullWidth?: boolean;
+  preserve?: boolean;
 }
 
-const { project, siteSlug, detailType = 1, fullWidth = false } = Astro.props;
+const { project, siteSlug, detailType = 1, fullWidth = false, preserve = true } = Astro.props;
 const wrapClass = "max-w-[1600px] mx-auto";
 const collaborators = project.projectCollaborators ?? [];
 const collaboratorGroups = collaborators.reduce<{ profession: string; names: string[] }[]>((acc, c) => {
@@ -37,7 +39,7 @@ const descParagraphs = (project.description ?? "")
 const descriptionHtml = project.description
   ? project.description
       .split(/\n\n+/)
-      .map((p) => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`)
+      .map((p) => `<p>${escapeProjectText(p.trim()).replace(/\n/g, "<br>")}</p>`)
       .join("")
   : "";
 const remainingImages = galleryImages.slice(2);
@@ -73,7 +75,7 @@ if (galleryImages.length > 0) {
 
 {detailType === 2 ? (
 
-  <article data-preserve class="pt-[var(--navbar-height,4rem)]">
+  <article data-preserve={preserve ? true : undefined} class="pt-[var(--navbar-height,4rem)]">
 
     <!-- Title + year -->
     <div class="px-6 md:px-12 lg:px-20 pt-12 pb-14">
@@ -209,7 +211,7 @@ if (galleryImages.length > 0) {
 
 ) : (
 
-  <article data-preserve>
+  <article data-preserve={preserve ? true : undefined}>
 
     <!-- Hero image -->
     {heroImage ? (

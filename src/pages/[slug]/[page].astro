@@ -23,7 +23,7 @@ if (!site) {
   return Astro.redirect('/404');
 }
 
-const { defaultLanguage: language } = normalizeSiteLanguages(site);
+const { defaultLanguage: language, enabledLanguages } = normalizeSiteLanguages(site);
 const pages = await getSitePages(site.id);
 const allPages = await getAllSitePages(site.id);
 const currentPage = allPages.find((p) => p.slug === pageSlug);
@@ -121,7 +121,7 @@ if (projectOrder.length > 0) {
       })}
 
       {currentPage.slug === "proyectos" && (
-        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} language={language} />
+        <ProjectList projects={projects} siteSlug={site.slug} layout={projectListLayout} showDescriptions={showDescriptions} fullWidth={!!site.full_width} language={language} languages={enabledLanguages} />
       )}
     </div>
   )}
