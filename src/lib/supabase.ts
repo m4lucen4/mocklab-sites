@@ -90,7 +90,9 @@ export async function getProjectListComponent(siteId: string): Promise<SiteCompo
 export async function getUserProjects(userId: string): Promise<Project[]> {
   const { data, error } = await supabaseAdmin
     .from("projects")
-    .select("*")
+    .select(`*, translation_settings:project_translation_settings(
+      original_language, translations:project_translations(language, title, description, keywords)
+    )`)
     .eq("user", userId);
 
   if (error) throw new Error(`Error fetching projects: ${error.message}`);

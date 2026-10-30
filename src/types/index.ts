@@ -1,3 +1,6 @@
+import type { ProjectTranslation } from '../lib/projectTranslations';
+import type { SiteLanguage } from '../lib/siteLanguages';
+
 export interface Site {
   id: string;
   user_id: string;
@@ -136,6 +139,10 @@ export interface ProjectCollaborator {
 }
 
 export interface Project {
+  translation_settings?: {
+    original_language: SiteLanguage;
+    translations: ProjectTranslation[];
+  } | null;
   id: string;
   user: string;
   title: string;
